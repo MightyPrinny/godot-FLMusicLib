@@ -80,18 +80,34 @@ public:
 				if(!musicPlayer->paused)
 					playTimeMsec += msec - prevMsec;
 				prevMsec = msec;
-                if(musicPlayer->sampler->TrackEnded() && musicPlayer->finish_music)
-				{
+                bool end = false;
+                if(musicInfo->type == VGM)
+                {
+                    if(musicInfo->trackLength>0 && playTimeMsec>musicInfo->trackLength)
+                    {
+                        end = true;
+                    }
+                    else if(musicPlayer->finish_music)
+                    {
+                        end = true;
+                    }
+                }
+                else
+                {
+                    if(playTimeMsec >= musicInfo->trackLength)
+                    {
+                        end = true;
+                    }
+                }
+                if(!end)
+                    OS::get_singleton()->delay_msec(10);
+                else {
+
                     stopAudioThread = true;
-					OS::get_singleton()->delay_msec(musicPlayer->GetLatency()-10);
-					playing = false;
+                    playing = false;
 
                     call_deferred("_MusicEnded");
-				}
-				else
-				{
-					OS::get_singleton()->delay_msec(10);
-				}
+                }
 			}
 			if(initMusic)
 			{

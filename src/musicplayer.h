@@ -66,7 +66,6 @@ private:
 			endMusic =false;
 			MusicPlayer::instance->paused = true;
             MusicPlayer::instance->finish_music = true;
-			soundio_outstream_clear_buffer(outstream);
 			return;
 		}
 		MusicPlayer::instance->WriteCallback(outstream,frame_count_min,frame_count_max);
@@ -92,6 +91,7 @@ private:
 	SoundIo* soundio = nullptr;
 	SoundIoDevice* device = nullptr;
     SoundIoOutStream* outstream = nullptr;
+
 
 	bool end_audio = false;
 	bool is_ok = true;
