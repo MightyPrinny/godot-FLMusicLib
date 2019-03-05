@@ -167,7 +167,7 @@ int MusicPlayer::NewOutStream()
 	outstream->write_callback = StreamWriteCalback;
 	outstream->underflow_callback = StreamUnderflowCallback;
 	outstream->name = nullptr;
-    outstream->software_latency = 30;
+    outstream->software_latency = 1;
 
     if(soundio_device_supports_sample_rate(device,44100))
     {
