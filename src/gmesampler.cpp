@@ -48,7 +48,11 @@ void GMESampler::WriteCallback(SoundIoOutStream *outstream, int frame_count_min,
 		return;
 	}
 	const struct SoundIoChannelLayout *layout = &outstream->layout;
-	int16_t *smbuf = new int16_t[frame_count*2];
+	if(buffer->capacity() < frame_count*2)
+	{
+		buffer->resize(frame_count*2);
+	}
+	auto smbuf = buffer->data();
 	gme_play(emu,frame_count*2,smbuf);
 	auto vol = GetVolume();
 	int frame = 0;
@@ -75,7 +79,6 @@ void GMESampler::WriteCallback(SoundIoOutStream *outstream, int frame_count_min,
                 }
         }
     }
-	delete[] smbuf;
 	if ((err = soundio_outstream_end_write(outstream))) {
 		if (err == SoundIoErrorUnderflow)
         {

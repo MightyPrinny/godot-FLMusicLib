@@ -3,6 +3,7 @@
 #include <gme.h>
 #include <iostream>
 #include <soundio.h>
+#include <vector>
 using namespace std;
 
 class GMESampler : public AudioSampler
@@ -34,8 +35,10 @@ public:
 		return gme_track_ended(emu);
 	}
 private:
+
 	Music_Emu* emu = nullptr;
 	bool playing  = true;
+	unique_ptr<vector<int16_t>> buffer = unique_ptr<vector<int16_t>>(new vector<int16_t>());
 
 };
 
