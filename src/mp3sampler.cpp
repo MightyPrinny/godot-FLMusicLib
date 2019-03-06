@@ -85,18 +85,17 @@ void MP3Sampler::WriteCallback(SoundIoOutStream *outstream, int frame_count_min,
                 {
                     loopPointStart = 0;
                 }
-                if(loopPointStart >= 0)
-                {
-                    if(loopPointEnd <=0)
-                    {
-                        loopPointEnd = PosToMsec(fileSize);
-                    }
-                    if((PosToMsec(trackPos)>=loopPointEnd) || (trackPos == fileSize-1))
-                    {
-                        trackPos = MsecToPos(loopPointStart);
-                        FLMusicLib::instance->SetCurrentPlayTime(loopPointStart);
-                    }
-                }
+				if(loopPointEnd <=0)
+				{
+					loopPointEnd = PosToMsec(fileSize-1);
+				}
+
+				if((PosToMsec(trackPos)>=loopPointEnd) || (trackPos == fileSize-1))
+				{
+					trackPos = MsecToPos(loopPointStart);
+					FLMusicLib::instance->SetCurrentPlayTime(loopPointStart);
+				}
+
 
             }
 

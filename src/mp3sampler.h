@@ -118,7 +118,12 @@ public:
 		{
 			return 0;
 		}
-		return (unsigned long)((double)msec*((((double)kbps*(double)125)/(double)1000)));
+		auto rt = (unsigned long)((double)msec*((((double)kbps*(double)125)/(double)1000)));
+		if(rt >= fileSize)
+		{
+			rt = fileSize -1;
+		}
+		return rt;
 	}
 
 	virtual int GetLengthMsec() override
