@@ -83,11 +83,7 @@ public:
                 bool end = false;
                 if(musicInfo->type == VGM)
                 {
-                    if(musicInfo->trackLength>0 && playTimeMsec>musicInfo->trackLength)
-                    {
-                        end = true;
-                    }
-                    else if(musicPlayer->finish_music)
+                    if(musicPlayer->finish_music)
                     {
                         end = true;
                     }
