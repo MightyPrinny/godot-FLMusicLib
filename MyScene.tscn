@@ -1,0 +1,186 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://MyScene.gd" type="Script" id=1]
+[ext_resource path="res://TrackList.gd" type="Script" id=2]
+
+[node name="MyScene" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="Btns" type="HBoxContainer" parent="."]
+margin_left = 30.5081
+margin_top = 34.1526
+margin_right = 225.508
+margin_bottom = 74.1526
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Play" type="Button" parent="Btns"]
+margin_right = 81.0
+margin_bottom = 40.0
+text = "Play/Pause"
+
+[node name="Store" type="Button" parent="Btns"]
+margin_left = 85.0
+margin_right = 130.0
+margin_bottom = 40.0
+text = "Store"
+
+[node name="Restore" type="Button" parent="Btns"]
+margin_left = 134.0
+margin_right = 195.0
+margin_bottom = 40.0
+text = "Restore"
+
+[node name="Stop" type="Button" parent="Btns"]
+margin_left = 199.0
+margin_right = 239.0
+margin_bottom = 40.0
+text = "Stop"
+
+[node name="ItemList" type="ItemList" parent="."]
+margin_left = 304.0
+margin_top = 37.0
+margin_right = 606.0
+margin_bottom = 322.0
+max_text_lines = 999
+same_column_width = true
+script = ExtResource( 2 )
+
+[node name="Load" type="Button" parent="."]
+margin_left = 409.734
+margin_top = 325.843
+margin_right = 476.734
+margin_bottom = 359.843
+text = "Load"
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+margin_left = 48.515
+margin_top = 96.9225
+margin_right = 207.515
+margin_bottom = 311.922
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 162.0
+margin_bottom = 236.0
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer"]
+margin_right = 155.0
+margin_bottom = 14.0
+text = "VGM"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+margin_top = 18.0
+margin_right = 155.0
+margin_bottom = 50.0
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+margin_right = 93.0
+margin_bottom = 31.0
+text = "Track Number:
+"
+
+[node name="TextEdit" type="LineEdit" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+show_behind_parent = true
+margin_left = 97.0
+margin_right = 155.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 32, 32 )
+rect_pivot_offset = Vector2( 16, 16 )
+
+[node name="MP3" type="Label" parent="PanelContainer/VBoxContainer"]
+margin_top = 54.0
+margin_right = 155.0
+margin_bottom = 85.0
+text = "MP3
+"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+margin_top = 89.0
+margin_right = 155.0
+margin_bottom = 121.0
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer2"]
+margin_right = 64.0
+margin_bottom = 31.0
+text = "LoopStart:
+"
+
+[node name="TextEdit" type="LineEdit" parent="PanelContainer/VBoxContainer/HBoxContainer2"]
+show_behind_parent = true
+margin_left = 68.0
+margin_right = 126.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 32, 32 )
+rect_pivot_offset = Vector2( 16, 16 )
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+margin_top = 125.0
+margin_right = 155.0
+margin_bottom = 157.0
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+margin_right = 58.0
+margin_bottom = 31.0
+text = "LoopEnd:
+"
+
+[node name="TextEdit" type="LineEdit" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+show_behind_parent = true
+margin_left = 62.0
+margin_right = 120.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 32, 32 )
+rect_pivot_offset = Vector2( 16, 16 )
+focus_mode = 1
+focus_mode = 1
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+margin_top = 161.0
+margin_right = 155.0
+margin_bottom = 201.0
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer4"]
+margin_top = 4.0
+margin_right = 35.0
+margin_bottom = 35.0
+text = "Loop:
+"
+
+[node name="CheckButton" type="CheckButton" parent="PanelContainer/VBoxContainer/HBoxContainer4"]
+margin_left = 39.0
+margin_right = 115.0
+margin_bottom = 40.0
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+margin_top = 205.0
+margin_right = 155.0
+margin_bottom = 229.0
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer5"]
+margin_top = 5.0
+margin_right = 49.0
+margin_bottom = 19.0
+text = "Volume"
+
+[node name="CheckButton" type="LineEdit" parent="PanelContainer/VBoxContainer/HBoxContainer5"]
+margin_left = 53.0
+margin_right = 111.0
+margin_bottom = 24.0
+
+[node name="Label" type="Label" parent="."]
+margin_left = 410.637
+margin_top = 9.9275
+margin_right = 475.637
+margin_bottom = 40.9275
+text = "Music List
+"
+
+[connection signal="pressed" from="Btns/Stop" to="." method="stop_music"]
+[connection signal="text_changed" from="PanelContainer/VBoxContainer/HBoxContainer/TextEdit" to="." method="set_track_number"]
+[connection signal="text_changed" from="PanelContainer/VBoxContainer/HBoxContainer2/TextEdit" to="." method="set_loop_start"]
+[connection signal="text_changed" from="PanelContainer/VBoxContainer/HBoxContainer3/TextEdit" to="." method="set_loop_end"]
+[connection signal="toggled" from="PanelContainer/VBoxContainer/HBoxContainer4/CheckButton" to="." method="set_loop"]
+[connection signal="text_changed" from="PanelContainer/VBoxContainer/HBoxContainer5/CheckButton" to="." method="set_volume"]

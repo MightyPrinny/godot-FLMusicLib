@@ -1,0 +1,18 @@
+[general]
+
+singleton=false
+load_once=true
+symbol_prefix="godot_"
+reloadable=true
+
+[entry]
+
+Windows.64="res://FLMusicLib/Windows/x64/FLMusicLib.dll"
+Windows.32="res://FLMusicLib/Windows/x86/FLMusicLib.dll"
+X11.64="res://FLMusicLib/Linux/x64/FLMusicLib.so"
+
+[dependencies]
+
+Windows.64=[ "res://FLMusicLib/Windows/x64/libsoundio.dll", "res://FLMusicLib/Windows/x64/libsoundio.dll.a" ]
+Windows.32=[ "res://FLMusicLib/Windows/x86/libsoundio.dll", "res://FLMusicLib/Windows/x86/libsoundio.dll.a" ]
+X11.64=[  ]
