@@ -9,6 +9,7 @@ Notes
 
 
 Methods
+
 -bool PlayMusic(String path,int trackNum,bool loop = true,int loopStart = -1,int loopEnd = -1,int startMsec = 0)
 
 -void StopMusic()
@@ -26,4 +27,5 @@ Methods
 -void TogglePause()
 
 Signals
+
 -track_ended: emited when the music is not looping and a music track ends, timing might not be accurate(Or might not be emited at all but I haven't seen that yet) for chiptune music since the music length is unknown.
