@@ -37,10 +37,6 @@ void GMESampler::WriteCallback(SoundIoOutStream *outstream, int frame_count_min,
 	int frame_count = frame_count_max;
 	if (!frame_count)
 		return;
-    if(MusicPlayer::instance->finish_music || TrackEnded())
-    {
-        return;
-    }
 	if ((err = soundio_outstream_begin_write(outstream, &areas, &frame_count))) {
 		//fprintf(stderr, "unrecoverable stream error: %s\n", soundio_strerror(err));
 		//reload_stream = true;
@@ -48,15 +44,10 @@ void GMESampler::WriteCallback(SoundIoOutStream *outstream, int frame_count_min,
 		return;
 	}
 	const struct SoundIoChannelLayout *layout = &outstream->layout;
-	if(buffer->capacity() < frame_count*2)
-	{
-		buffer->resize(frame_count*2);
-	}
-	auto smbuf = buffer->data();
+	int16_t *smbuf = new int16_t[frame_count*2];
 	gme_play(emu,frame_count*2,smbuf);
 	auto vol = GetVolume();
-	int frame = 0;
-	for (; frame < frame_count; frame += 1) {
+	for (int frame = 0; frame < frame_count; frame += 1) {
 		int16_t sample = smbuf[frame];
 		uint8_t b[2];
 		b[1] = (sample & 0xFF00)>>8; // heigh byte
@@ -67,24 +58,15 @@ void GMESampler::WriteCallback(SoundIoOutStream *outstream, int frame_count_min,
 			areas[channel].ptr += areas[channel].step;
 		}
 	}
-    if(frame<frame_count)
-    {
-        for(;frame<frame_count;++frame)
-        {
-            for (int channel = 0; channel < layout->channel_count; channel += 1) {
-                int16_t *ptr = (int16_t*)areas[channel].ptr;
-                *ptr = 0;
-                areas[channel].ptr += areas[channel].step;
-
-                }
-        }
-    }
+	if(gme_track_ended(emu))
+	{
+		MusicPlayer::instance->endMusic = true;
+	}
+	delete[] smbuf;
 	if ((err = soundio_outstream_end_write(outstream))) {
 		if (err == SoundIoErrorUnderflow)
-        {
-
 			return;
-        }
+
 		//fprintf(stderr, "unrecoverable stream error: %s\n", soundio_strerror(err));
 		//queueNewStream();
 		return;

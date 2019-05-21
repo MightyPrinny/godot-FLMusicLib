@@ -10,15 +10,10 @@
 #include <vector>
 
 #include <minimp3.h>
-#include <queue>
 
 class MP3Sampler : public AudioSampler
 {
 public:
-    MP3Sampler()
-    {
-        remaining = make_unique<std::queue<mp3d_sample_t>>();
-    }
 	virtual ~MP3Sampler() override
 	{
 		if(dec != nullptr)
@@ -66,15 +61,14 @@ public:
 
 	}
 
-    mp3dec_frame_info_t CheckKbps(int i = 0)
+	void CheckKbps()
 	{
 		mp3dec_frame_info_t info;
 		mp3dec_init(dec);
 		auto data = fileData.get();
 
-        mp3dec_decode_frame(dec, (data+i),MINIMP3_MAX_SAMPLES_PER_FRAME,frameBuff,&info);
+		mp3dec_decode_frame(dec, (data+0),MINIMP3_MAX_SAMPLES_PER_FRAME,frameBuff,&info);
 		kbps = info.bitrate_kbps;
-        return info;
 	}
 
 	virtual int TellMsec() override
@@ -118,12 +112,7 @@ public:
 		{
 			return 0;
 		}
-		auto rt = (unsigned long)((double)msec*((((double)kbps*(double)125)/(double)1000)));
-		if(rt >= fileSize)
-		{
-			rt = fileSize -1;
-		}
-		return rt;
+		return (unsigned long)((double)msec*((((double)kbps*(double)125)/(double)1000)));
 	}
 
 	virtual int GetLengthMsec() override
@@ -135,7 +124,6 @@ public:
 	{
 		return trackPos == (fileSize-1);
 	}
-    bool firstWrite = true;
 private:
     std::vector<mp3d_sample_t >* buff = new std::vector<mp3d_sample_t >();
     mp3d_sample_t * frameBuff = new mp3d_sample_t[MINIMP3_MAX_SAMPLES_PER_FRAME*4];
@@ -146,7 +134,6 @@ private:
 	double lt;
 	bool end = false;
 	bool wcb = false;
-    unique_ptr<std::queue<mp3d_sample_t>>remaining;
 
 
 };

@@ -45,8 +45,8 @@ public:                                                                         
 		Name *instance = godot::as<Name>(script->new_());                                                                                           \
 		return instance;                                                                                                                            \
 	}                                                                                                                                               \
-	inline static size_t ___get_id() { return typeid(Name).hash_code(); };                                                                          \
-	inline static size_t ___get_base_id() { return typeid(Base).hash_code(); };                                                                     \
+	inline static size_t ___get_id() { return typeid(Name).hash_code(); }                                                                          \
+	inline static size_t ___get_base_id() { return typeid(Base).hash_code(); }                                                                     \
 	inline static const char *___get_base_type_name() { return Base::___get_class_name(); }                                                         \
 	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *)godot::as<Name>(godot::Object::___get_from_variant(a)); } \
                                                                                                                                                     \
@@ -326,8 +326,13 @@ void register_property(const char *name, P(T::*var), P default_value, godot_meth
 	godot_string *_hint_string = (godot_string *)&hint_string;
 
 	godot_property_attributes attr = {};
-	attr.type = def_val.get_type();
-	attr.default_value = *(godot_variant *)&def_val;
+	if (def_val.get_type() == Variant::NIL) {
+		attr.type = Variant::OBJECT;
+	} else {
+		attr.type = def_val.get_type();
+		attr.default_value = *(godot_variant *)&def_val;
+	}
+
 	attr.hint = hint;
 	attr.rset_type = rpc_mode;
 	attr.usage = usage;
@@ -356,12 +361,19 @@ template <class T, class P>
 void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED, godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
 	Variant def_val = default_value;
 
+	godot_string *_hint_string = (godot_string *)&hint_string;
+
 	godot_property_attributes attr = {};
-	attr.type = def_val.get_type();
-	attr.default_value = *(godot_variant *)&def_val;
+	if (def_val.get_type() == Variant::NIL) {
+		attr.type = Variant::OBJECT;
+	} else {
+		attr.type = def_val.get_type();
+		attr.default_value = *(godot_variant *)&def_val;
+	}
 	attr.hint = hint;
 	attr.rset_type = rpc_mode;
 	attr.usage = usage;
+	attr.hint_string = *_hint_string;
 
 	_PropertySetFunc<T, P> *wrapped_set = (_PropertySetFunc<T, P> *)godot::api->godot_alloc(sizeof(_PropertySetFunc<T, P>));
 	wrapped_set->f = setter;

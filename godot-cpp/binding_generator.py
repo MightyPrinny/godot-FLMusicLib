@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/env python
 
 import json
 
@@ -7,35 +7,35 @@ import json
 classes = []
 
 def generate_bindings(path):
-    
+
     global classes
     classes = json.load(open(path))
-    
+
     icalls = set()
-    
+
     for c in classes:
         # print c['name']
         used_classes = get_used_classes(c)
-        
+
         header = generate_class_header(used_classes, c)
-        
+
         impl = generate_class_implementation(icalls, used_classes, c)
-        
+
         header_file = open("include/gen/" + strip_name(c["name"]) + ".hpp", "w+")
         header_file.write(header)
-        
+
         source_file = open("src/gen/" + strip_name(c["name"]) + ".cpp", "w+")
         source_file.write(impl)
-    
-    
-    icall_header_file = open("src/gen/__icalls.hpp", "w+")
+
+
+    icall_header_file = open("include/gen/__icalls.hpp", "w+")
     icall_header_file.write(generate_icall_header(icalls))
-    
-    icall_source_file = open("src/gen/__icalls.cpp", "w+")
-    icall_source_file.write(generate_icall_implementation(icalls))
 
     register_types_file = open("src/gen/__register_types.cpp", "w+")
     register_types_file.write(generate_type_registry(classes))
+
+    init_method_bindings_file = open("src/gen/__init_method_bindings.cpp", "w+")
+    init_method_bindings_file.write(generate_init_method_bindings(classes))
 
 
 def is_reference_type(t):
@@ -58,8 +58,9 @@ def make_gdnative_type(t):
         if t == "int":
             return "int64_t "
         if t == "float" or t == "real":
-            return "double "
+            return "real_t "
         return strip_name(t) + " "
+
 
 def generate_class_header(used_classes, c):
 
@@ -68,12 +69,12 @@ def generate_class_header(used_classes, c):
     source.append("#define GODOT_CPP_" + strip_name(c["name"]).upper() + "_HPP")
     source.append("")
     source.append("")
-    
+
     source.append("#include <gdnative_api_struct.gen.h>")
     source.append("#include <stdint.h>")
     source.append("")
-    
-    
+
+
     source.append("#include <core/CoreTypes.hpp>")
 
     class_name = strip_name(c["name"])
@@ -101,11 +102,11 @@ def generate_class_header(used_classes, c):
                 source.append("#include \"" + used_class_name + ".hpp\"")
 
     source.append("")
-    
+
     if c["base_class"] != "":
         source.append("#include \"" + strip_name(c["base_class"]) + ".hpp\"")
-        
-    
+
+
     source.append("namespace godot {")
     source.append("")
 
@@ -115,19 +116,19 @@ def generate_class_header(used_classes, c):
             continue
         else:
             source.append("class " + strip_name(used_type) + ";")
-    
-    
+
+
     source.append("")
-    
+
     vararg_templates = ""
-    
+
     # generate the class definition here
     source.append("class " + class_name + (" : public _Wrapped" if c["base_class"] == "" else (" : public " + strip_name(c["base_class"])) ) + " {")
 
     if c["base_class"] == "":
         source.append("public: enum { ___CLASS_IS_SCRIPT = 0, };")
-        source.append("private:")
         source.append("")
+        source.append("private:")
 
     if c["singleton"]:
         source.append("\tstatic " + class_name + " *_singleton;")
@@ -135,8 +136,18 @@ def generate_class_header(used_classes, c):
         source.append("\t" + class_name + "();")
         source.append("")
 
+    # Generate method table
+    source.append("\tstruct ___method_bindings {")
 
+    for method in c["methods"]:
+        source.append("\t\tgodot_method_bind *mb_" + method["name"] + ";")
+
+    source.append("\t};")
+    source.append("\tstatic ___method_bindings ___mb;")
+    source.append("")
     source.append("public:")
+    source.append("\tstatic void ___init_method_bindings();")
+
     source.append("")
 
 
@@ -168,17 +179,17 @@ def generate_class_header(used_classes, c):
         source.append("\t};")
 
     source.append("\n\t// constants")
-    
+
     for name in c["constants"]:
         if name not in enum_values:
             source.append("\tconst static int " + name + " = " + str(c["constants"][name]) + ";")
 
-    
+
     if c["instanciable"]:
         source.append("")
         source.append("")
         source.append("\tstatic " + class_name + " *_new();")
-    
+
     source.append("\n\t// methods")
 
 
@@ -188,28 +199,28 @@ def generate_class_header(used_classes, c):
         source.append("\tstatic T *cast_to(const Object *obj);")
         source.append("#endif")
         source.append("")
-    
+
     for method in c["methods"]:
-        
+
         method_signature = ""
-        
+
         # TODO decide what to do about virtual methods
         # method_signature += "virtual " if method["is_virtual"] else ""
         method_signature += make_gdnative_type(method["return_type"])
         method_name = escape_cpp(method["name"])
         method_signature +=  method_name + "("
-            
-            
+
+
         has_default_argument = False
         method_arguments = ""
-        
+
         for i, argument in enumerate(method["arguments"]):
             method_signature += "const " + make_gdnative_type(argument["type"])
             argument_name = escape_cpp(argument["name"])
             method_signature += argument_name
             method_arguments += argument_name
-            
-            
+
+
             # default arguments
             def escape_default_arg(_type, default_value):
                 if _type == "Color":
@@ -236,51 +247,51 @@ def generate_class_header(used_classes, c):
                     return "\"" + default_value + "\""
                 if _type == "RID":
                     return "RID()"
-                
+
                 if default_value == "Null" or default_value == "[Object:null]":
                     return "nullptr"
-                    
+
                 return default_value
-                    
-            
-            
-            
+
+
+
+
             if argument["has_default_value"] or has_default_argument:
                 method_signature += " = " + escape_default_arg(argument["type"], argument["default_value"])
                 has_default_argument = True
-            
-            
-            
+
+
+
             if i != len(method["arguments"]) - 1:
                 method_signature += ", "
                 method_arguments += ","
-                
+
         if method["has_varargs"]:
             if len(method["arguments"]) > 0:
                 method_signature += ", "
                 method_arguments += ", "
             vararg_templates += "\ttemplate <class... Args> " + method_signature + "Args... args){\n\t\treturn " + method_name + "(" + method_arguments + "Array::make(args...));\n\t}\n"""
             method_signature += "const Array& __var_args = Array()"
-            
+
         method_signature += ")" + (" const" if method["is_const"] else "")
-            
+
 
         source.append("\t" + method_signature + ";")
-    
+
     source.append(vararg_templates)
     source.append("};")
     source.append("")
-    
-    
+
+
 
     source.append("}")
     source.append("")
-    
+
     source.append("#endif")
-    
-    
+
+
     return "\n".join(source)
- 
+
 
 
 
@@ -291,34 +302,34 @@ def generate_class_implementation(icalls, used_classes, c):
     source.append("#include \"" + class_name + ".hpp\"")
     source.append("")
     source.append("")
-    
+
     source.append("#include <core/GodotGlobal.hpp>")
     source.append("#include <core/CoreTypes.hpp>")
     source.append("#include <core/Ref.hpp>")
-    
+
     source.append("#include <core/Godot.hpp>")
     source.append("")
-    
-    
+
+
     source.append("#include \"__icalls.hpp\"")
     source.append("")
     source.append("")
-    
+
     for used_class in used_classes:
         if is_enum(used_class):
             continue
         else:
             source.append("#include \"" + strip_name(used_class) + ".hpp\"")
-    
+
     source.append("")
     source.append("")
-    
+
     source.append("namespace godot {")
-    
-    
+
+
     core_object_name = "this"
-    
-    
+
+
     source.append("")
     source.append("")
 
@@ -326,44 +337,54 @@ def generate_class_implementation(icalls, used_classes, c):
         source.append("" + class_name + " *" + class_name + "::_singleton = NULL;")
         source.append("")
         source.append("")
-        
+
         # FIXME Test if inlining has a huge impact on binary size
         source.append(class_name + "::" + class_name + "() {")
         source.append("\t_owner = godot::api->godot_global_get_singleton((char *) \"" + strip_name(c["name"]) + "\");")
         source.append("}")
-        
+
         source.append("")
         source.append("")
-    
-    
-    
+
+    # Method table initialization
+    source.append(class_name + "::___method_bindings " + class_name + "::___mb = {};")
+    source.append("")
+
+    source.append("void " + class_name + "::___init_method_bindings() {")
+
+    for method in c["methods"]:
+        source.append("\t___mb.mb_" + method["name"] + " = godot::api->godot_method_bind_get_method(\"" + c["name"] + "\", \"" + method["name"] + "\");")
+
+    source.append("}")
+    source.append("")
+
     if c["instanciable"]:
         source.append(class_name + " *" + strip_name(c["name"]) + "::_new()")
         source.append("{")
         source.append("\treturn (" + class_name + " *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, godot::api->godot_get_class_constructor((char *)\"" + c["name"] + "\")());")
         source.append("}")
-    
+
     for method in c["methods"]:
         method_signature = ""
 
-        
+
         method_signature += make_gdnative_type(method["return_type"])
         method_signature += strip_name(c["name"]) + "::" + escape_cpp(method["name"]) + "("
-        
+
         for i, argument in enumerate(method["arguments"]):
             method_signature += "const " + make_gdnative_type(argument["type"])
             method_signature += escape_cpp(argument["name"])
-            
+
             if i != len(method["arguments"]) - 1:
                 method_signature += ", "
-                
+
         if method["has_varargs"]:
             if len(method["arguments"]) > 0:
                 method_signature += ", "
             method_signature += "const Array& __var_args"
-            
+
         method_signature += ")" + (" const" if method["is_const"] else "")
-    
+
         source.append(method_signature + " {")
 
 
@@ -373,15 +394,9 @@ def generate_class_implementation(icalls, used_classes, c):
             source.append("}")
             source.append("")
             continue
-        else:
-        
-            source.append("\tstatic godot_method_bind *mb = nullptr;")
-            source.append("\tif (mb == nullptr) {")
-            source.append("\t\tmb = godot::api->godot_method_bind_get_method(\"" + c["name"] +"\", \"" + method["name"] + "\");")
-            source.append("\t}")
-        
+
         return_statement = ""
-        
+
         if method["return_type"] != "void":
             if is_class_type(method["return_type"]):
                 if is_enum(method["return_type"]):
@@ -392,72 +407,72 @@ def generate_class_implementation(icalls, used_classes, c):
                     return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
             else:
                 return_statement += "return "
-        
+
         def get_icall_type_name(name):
             if is_enum(name):
                 return "int"
             if is_class_type(name):
                 return "Object"
             return name
-        
-        
-        
+
+
+
         if method["has_varargs"]:
 
             if len(method["arguments"]) != 0:
                 source.append("\tVariant __given_args[" + str(len(method["arguments"])) + "];")
-            
+
             for i, argument in enumerate(method["arguments"]):
                 source.append("\tgodot::api->godot_variant_new_nil((godot_variant *) &__given_args[" + str(i) + "]);")
-                
+
             source.append("")
-            
-            
+
+
             for i, argument in enumerate(method["arguments"]):
                 source.append("\t__given_args[" + str(i) + "] = " + escape_cpp(argument["name"]) + ";")
-            
+
             source.append("")
-            
+
             size = ""
             if method["has_varargs"]:
                 size = "(__var_args.size() + " + str(len(method["arguments"])) + ")"
             else:
                 size = "(" + str(len(method["arguments"])) + ")"
-            
+
             source.append("\tgodot_variant **__args = (godot_variant **) alloca(sizeof(godot_variant *) * " + size + ");")
-            
+
             source.append("")
-            
+
             for i, argument in enumerate(method["arguments"]):
                 source.append("\t__args[" + str(i) + "] = (godot_variant *) &__given_args[" + str(i) + "];")
-                
+
             source.append("")
-            
+
             if method["has_varargs"]:
                 source.append("\tfor (int i = 0; i < __var_args.size(); i++) {")
                 source.append("\t\t__args[i + " + str(len(method["arguments"])) + "] = (godot_variant *) &((Array &) __var_args)[i];")
                 source.append("\t}")
-           
+
             source.append("")
-            
+
             source.append("\tVariant __result;")
-            source.append("\t*(godot_variant *) &__result = godot::api->godot_method_bind_call(mb, ((const Object *) " + core_object_name + ")->_owner, (const godot_variant **) __args, " + size + ", nullptr);")
-            
+            source.append("\t*(godot_variant *) &__result = godot::api->godot_method_bind_call(___mb.mb_" + method["name"] + ", ((const Object *) " + core_object_name + ")->_owner, (const godot_variant **) __args, " + size + ", nullptr);")
+
             source.append("")
-            
+
             if is_class_type(method["return_type"]):
                 source.append("\tObject *obj = Object::___get_from_variant(__result);")
                 source.append("\tif (obj->has_method(\"reference\"))")
                 source.append("\t\tobj->callv(\"reference\", Array());")
 
                 source.append("")
-            
-            
+
+
             for i, argument in enumerate(method["arguments"]):
                 source.append("\tgodot::api->godot_variant_destroy((godot_variant *) &__given_args[" + str(i) + "]);")
-                
+
             source.append("")
-            
+
             if method["return_type"] != "void":
                 cast = ""
                 if is_class_type(method["return_type"]):
@@ -468,40 +483,40 @@ def generate_class_implementation(icalls, used_classes, c):
                 else:
                     cast += "__result;"
                 source.append("\treturn " + cast)
-            
-            
-            
+
+
+
         else:
-        
+
             args = []
             for arg in method["arguments"]:
                 args.append(get_icall_type_name(arg["type"]))
-            
+
             icall_ret_type = get_icall_type_name(method["return_type"])
-            
+
             icall_sig = tuple((icall_ret_type, tuple(args)))
-            
+
             icalls.add(icall_sig)
-            
+
             icall_name = get_icall_name(icall_sig)
-            
-            return_statement += icall_name + "(mb, (const Object *) " + core_object_name
-            
+
+            return_statement += icall_name + "(___mb.mb_" + method["name"] + ", (const Object *) " + core_object_name
+
             for arg in method["arguments"]:
                 return_statement += ", " + escape_cpp(arg["name"]) + (".ptr()" if is_reference_type(arg["type"]) else "")
-                
+
             return_statement += ")"
-            
+
             source.append("\t" + return_statement + (")" if is_reference_type(method["return_type"]) else "") + ";")
-        
+
         source.append("}")
         source.append("")
 
-    
-    
+
+
     source.append("}")
-    
-    
+
+
     return "\n".join(source)
 
 
@@ -509,93 +524,39 @@ def generate_class_implementation(icalls, used_classes, c):
 
 
 def generate_icall_header(icalls):
-    
+
     source = []
     source.append("#ifndef GODOT_CPP__ICALLS_HPP")
     source.append("#define GODOT_CPP__ICALLS_HPP")
-    
-    source.append("")
-    
-    source.append("#include <gdnative_api_struct.gen.h>")
-    source.append("#include <stdint.h>")
-    source.append("")
-    
-    source.append("#include <core/CoreTypes.hpp>")
-    source.append("#include \"Object.hpp\"")
-    source.append("")
-    source.append("")
-    
-    source.append("namespace godot {")
-    source.append("")
-    
-    for icall in icalls:
-        ret_type = icall[0]
-        args = icall[1]
-        
-        method_signature = ""
-        
-        method_signature += return_type(ret_type) + get_icall_name(icall) + "(godot_method_bind *mb, const Object *inst"
-        
-        for arg in args:
-            method_signature += ", const "
-            
-            if is_core_type(arg):
-                method_signature += arg + "&"
-            elif arg == "int":
-                method_signature += "int64_t "
-            elif arg == "float":
-                method_signature += "double "
-            elif is_primitive(arg):
-                method_signature += arg
-            else:
-                method_signature += "Object *"
-        
-        method_signature += ");"
-        
-        source.append(method_signature)
-    
-    source.append("")
-    
-    source.append("}")
-    source.append("")
-    
-    source.append("#endif")
-    
-    return "\n".join(source)
-    
 
-def generate_icall_implementation(icalls):
-    source = []
-    source.append("#include \"__icalls.hpp\"")
-    
     source.append("")
-    
+
     source.append("#include <gdnative_api_struct.gen.h>")
     source.append("#include <stdint.h>")
     source.append("")
-    
+
     source.append("#include <core/GodotGlobal.hpp>")
     source.append("#include <core/CoreTypes.hpp>")
     source.append("#include \"Object.hpp\"")
     source.append("")
     source.append("")
-    
+
     source.append("namespace godot {")
     source.append("")
-    
+
     for icall in icalls:
         ret_type = icall[0]
         args = icall[1]
-        
-        method_signature = ""
-        
-        method_signature += return_type(ret_type) + get_icall_name(icall) + "(godot_method_bind *mb, const Object *inst"
-        
+
+        method_signature = "static inline "
+
+        method_signature += get_icall_return_type(ret_type) + get_icall_name(icall) + "(godot_method_bind *mb, const Object *inst"
+
         for i, arg in enumerate(args):
             method_signature += ", const "
-            
+
             if is_core_type(arg):
-                method_signature += arg + "& "
+                method_signature += arg + "&"
             elif arg == "int":
                 method_signature += "int64_t "
             elif arg == "float":
@@ -604,37 +565,37 @@ def generate_icall_implementation(icalls):
                 method_signature += arg + " "
             else:
                 method_signature += "Object *"
-            
+
             method_signature += "arg" + str(i)
-        
+
         method_signature += ")"
-        
+
         source.append(method_signature + " {")
-        
+
         if ret_type != "void":
-            source.append("\t" + ("godot_object *" if is_class_type(ret_type) else return_type(ret_type)) + "ret;")
+            source.append("\t" + ("godot_object *" if is_class_type(ret_type) else get_icall_return_type(ret_type)) + "ret;")
             if is_class_type(ret_type):
                 source.append("\tret = nullptr;")
-        
-        
+
+
         source.append("\tconst void *args[" + ("1" if len(args) == 0 else "") + "] = {")
-        
+
         for i, arg in enumerate(args):
-            
+
             wrapped_argument = "\t\t"
             if is_primitive(arg) or is_core_type(arg):
                 wrapped_argument += "(void *) &arg" + str(i)
             else:
                 wrapped_argument += "(void *) (arg" + str(i) + ") ? arg" + str(i) + "->_owner : nullptr"
-            
+
             wrapped_argument += ","
             source.append(wrapped_argument)
-        
+
         source.append("\t};")
         source.append("")
-        
+
         source.append("\tgodot::api->godot_method_bind_ptrcall(mb, inst->_owner, args, " + ("nullptr" if ret_type == "void" else "&ret") + ");")
-        
+
         if ret_type != "void":
             if is_class_type(ret_type):
                 source.append("\tif (ret) {")
@@ -644,20 +605,21 @@ def generate_icall_implementation(icalls):
                 source.append("\treturn (Object *) ret;")
             else:
                 source.append("\treturn ret;")
-        
+
         source.append("}")
-    
+        source.append("")
+
     source.append("}")
     source.append("")
-    
+
+    source.append("#endif")
+
     return "\n".join(source)
-
-
 
 
 def generate_type_registry(classes):
     source = []
-    
+
     source.append("#include \"TagDB.hpp\"")
     source.append("#include <typeinfo>")
     source.append("\n")
@@ -695,18 +657,34 @@ def generate_type_registry(classes):
     return "\n".join(source)
 
 
+def generate_init_method_bindings(classes):
+    source = []
+
+    for c in classes:
+        source.append("#include <" + strip_name(c["name"]) + ".hpp>")
+
+    source.append("")
+    source.append("")
+
+    source.append("namespace godot {")
+
+    source.append("void ___init_method_bindings()")
+    source.append("{")
+
+    for c in classes:
+        class_name = strip_name(c["name"])
+
+        source.append("\t" + strip_name(c["name"]) + "::___init_method_bindings();")
+
+    source.append("}")
+
+    source.append("")
+    source.append("}")
+
+    return "\n".join(source)
 
 
-
-
-
-
-
-
-
-
-
-def return_type(t):
+def get_icall_return_type(t):
     if is_class_type(t):
         return "Object *"
     if t == "int":
@@ -719,12 +697,12 @@ def return_type(t):
 def get_icall_name(sig):
     ret_type = sig[0]
     args = sig[1]
-    
+
     name = "___godot_icall_"
     name += strip_name(ret_type)
     for arg in args:
         name += "_" + strip_name(arg)
-    
+
     return name
 
 
@@ -737,7 +715,7 @@ def get_used_classes(c):
     for method in c["methods"]:
         if is_class_type(method["return_type"]) and not (method["return_type"] in classes):
             classes.append(method["return_type"])
-        
+
         for arg in method["arguments"]:
             if is_class_type(arg["type"]) and not (arg["type"] in classes):
                 classes.append(arg["type"])

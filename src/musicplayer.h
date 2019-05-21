@@ -92,7 +92,6 @@ private:
 	SoundIoDevice* device = nullptr;
     SoundIoOutStream* outstream = nullptr;
 
-
 	bool end_audio = false;
 	bool is_ok = true;
 	unsigned long startMsec;

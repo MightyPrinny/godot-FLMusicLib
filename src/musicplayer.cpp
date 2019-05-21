@@ -14,7 +14,6 @@ MusicPlayer::MusicPlayer()
 		std::cout<<"out of memory\n";
 	}
     int err = 0;
-
     err = soundio_connect(soundio);
 
 	if (err) {
@@ -150,10 +149,6 @@ void MusicPlayer::StreamFailureCallback(SoundIoOutStream *soundio, int)
 void MusicPlayer::StreamUnderflowCallback(SoundIoOutStream *soundio)
 {
 	std::cout << "Stream underflow\n";
-    if(!instance->finish_music && instance->sampler->TrackEnded())
-    {
-        instance->finish_music = true;
-    }
 }
 
 int MusicPlayer::NewOutStream()
@@ -167,8 +162,7 @@ int MusicPlayer::NewOutStream()
 	outstream->write_callback = StreamWriteCalback;
 	outstream->underflow_callback = StreamUnderflowCallback;
 	outstream->name = nullptr;
-    outstream->software_latency = 1;
-
+	outstream->software_latency = 10;
     if(soundio_device_supports_sample_rate(device,44100))
     {
         sample_rate = 44100;
