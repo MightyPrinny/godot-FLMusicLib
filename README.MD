@@ -8,21 +8,21 @@ Notes
 
 Methods
 
--bool PlayMusic(String path,int trackNum,bool loop = true,int loopStart = -1,int loopEnd = -1,int startMsec = 0)
+-bool play_music(String path,int trackNum,bool loop = true,int loopStart = -1,int loopEnd = -1,int startMsec = 0)
 
--void StopMusic()
+-void stop_music()
 
--bool IsPlaying()
+-bool is_playing()
 
--void SetVolume(float vol)
+-void set_volume(float vol)
 
--void StoreMusicState()
+-void store_music_state()
 
--void RestoreMusicState()
+-void restore_music_state()
 
--int GetTrackPositionMsec()
+-int get_track_position_msec()
 
--void TogglePause()
+-void toggle_pause()
 
 Signals
 
