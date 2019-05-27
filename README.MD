@@ -1,9 +1,7 @@
 GDNative library that plays mp3 and chiptune music files.
-The project uses GameMuseEmu, Minimp3 and libsoundio
+The project uses GameMuseEmu, Minimp3 and the new Audio features from Godot 3.1.1
 
 Notes
-
--Currently a lot of things are hardcoded like the sample rate(44100) and the sound format (S16LE), I think these settings work  on any hardware but I might be wrong.
 
 -mp3 files must have a constant bitrate.
 
@@ -16,7 +14,7 @@ Methods
 
 -bool IsPlaying()
 
--void SetVolumeMultiplier(float vol)
+-void SetVolume(float vol)
 
 -void StoreMusicState()
 
