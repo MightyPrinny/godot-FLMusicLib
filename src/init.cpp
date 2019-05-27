@@ -183,7 +183,6 @@ public:
 		musicPlayer->BeginStreaming();
         musicPlayer->HandlePlayback();
         player->play();
-        cout << musicInfo->trackLength;
 
 	}
 
@@ -208,6 +207,7 @@ public:
 		musicPlayer = new MusicPlayer();
         musicPlayer->gen = gen;
         musicPlayer->playback = play;
+		musicPlayer->player = player;
 	}
 
 
@@ -351,6 +351,7 @@ public:
 			audioThread = nullptr;
 		}
         stopAudioThread = false;
+		player->stop();
 	}
 	void SetCurrentPlayTime(int msecs)
 	{

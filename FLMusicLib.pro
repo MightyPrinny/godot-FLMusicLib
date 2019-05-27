@@ -48,9 +48,9 @@ win32:contains(QMAKE_TARGET.arch, x86){
 
 linux:{
     #LIBS += -L/home/Fabian/Documents/Godot/GDNative/libsound/libsoundio/Build/ -lsoundio
-    PRE_TARGETDEPS += $$PWD/godot-cpp/bin/libgodot-cpp.linux.debug.64.a
+    PRE_TARGETDEPS += $$PWD/godot-cpp/bin/libgodot-cpp.linux.release.64.a
     LIBS += -L$$PWD/godot-cpp/bin
-    LIBS += -lgodot-cpp.linux.debug.64
+    LIBS += -lgodot-cpp.linux.release.64
     PRE_TARGETDEPS += $$PWD/lib/linux/x64/libgme.a
     LIBS += -L$$PWD/lib/linux/x64
     LIBS += -lgme

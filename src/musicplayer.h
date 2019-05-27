@@ -5,6 +5,7 @@
 #include <AudioStreamGenerator.hpp>
 #include <AudioStreamGeneratorPlayback.hpp>
 #include <PoolArrays.hpp>
+#include <AudioStreamPlayer.hpp>
 
 using namespace godot;
 
@@ -69,9 +70,11 @@ public:
     bool finish_music = false;
     Ref<AudioStreamGenerator> gen;
     Ref<AudioStreamGeneratorPlayback> playback;
+	AudioStreamPlayer *player;
 
     void CleanBuffer()
     {
+
         for(int i=0;i<buffer_size;++i)
         {
             buffer.set(i,Vector2(0,0));

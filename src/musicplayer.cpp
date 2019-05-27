@@ -53,7 +53,6 @@ void MusicPlayer::HandlePlayback()
 {
     if(playback->get_frames_available()<=0)
     {
-        cout<<"ass";
         return;
     }
     if (sampler->autoBufferSize)

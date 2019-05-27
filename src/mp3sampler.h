@@ -15,7 +15,7 @@ class MP3Sampler : public AudioSampler
 public:
     MP3Sampler()
     {
-        customBufferSize = MINIMP3_MAX_SAMPLES_PER_FRAME*4;
+		customBufferSize = MINIMP3_MAX_SAMPLES_PER_FRAME*4;
         autoBufferSize = false;
     }
 
