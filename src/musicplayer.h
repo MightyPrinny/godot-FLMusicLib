@@ -1,9 +1,13 @@
 #pragma once
-#include <soundio.h>
 #include <gmesampler.h>
-#include <soundio.h>
 #include <mp3sampler.h>
 #include <OS.hpp>
+#include <AudioStreamGenerator.hpp>
+#include <AudioStreamGeneratorPlayback.hpp>
+#include <PoolArrays.hpp>
+
+using namespace godot;
+
 enum FileType
 {
 	VGM,
@@ -29,6 +33,7 @@ public:
 		if(sampler != nullptr)
 		{
 			sampler->Seek(msec);
+            CleanBuffer();
 		}
 	}
 	void SetVolumeFact(float v)
@@ -37,61 +42,47 @@ public:
 	}
 	void BeginStreaming()
 	{
-		NewOutStream();
 		startMsec = godot::OS::get_singleton()->get_ticks_msec();
+        CleanBuffer();
 	}
 	void TogglePause()
 	{
 		paused = !paused;
-		soundio_outstream_pause(outstream,paused);
 	}
 	int GetLatency()
 	{
 		double l;
-		soundio_outstream_get_latency(outstream,&l);
 		return (l*1000);
 	}
+
+    void SetBufferSize(int size)
+    {
+        buffer_size = size;
+        buffer.resize(size);
+    }
+
 	AudioSampler *sampler = nullptr;
+
 	static MusicPlayer *instance;
 	static bool endMusic;
 	float volumeFact = 1;
-    SoundIoFormat format;
     bool finish_music = false;
+    Ref<AudioStreamGenerator> gen;
+    Ref<AudioStreamGeneratorPlayback> playback;
+
+    void CleanBuffer()
+    {
+        for(int i=0;i<buffer_size;++i)
+        {
+            buffer.set(i,Vector2(0,0));
+        }
+        playback->clear_buffer();
+    }
+
 private:
-	static void BackendErrCallback(SoundIo* soundio,int err);
-	static void StreamWriteCalback(struct SoundIoOutStream *outstream, int frame_count_min, int frame_count_max)
-	{
-		if(endMusic)
-		{
-			endMusic =false;
-			MusicPlayer::instance->paused = true;
-            MusicPlayer::instance->finish_music = true;
-			return;
-		}
-		MusicPlayer::instance->WriteCallback(outstream,frame_count_min,frame_count_max);
-	}
-	static void DevicesChangeCallback(SoundIo* soundio);
-	static void StreamFailureCallback(SoundIoOutStream* soundio,int );
-	static void StreamUnderflowCallback(SoundIoOutStream* soundio);
-	void queueNewStream()
-	{
-
-	}
-	void WriteCallback(struct SoundIoOutStream *outstream, int frame_count_min, int frame_count_max)
-	{
-		if(sampler == nullptr)
-		{
-			return;
-		}
-		sampler->WriteCallback(outstream,frame_count_min,frame_count_max);
-	}
-	int NewOutStream();
-	void QueueNewOutStream();
-
-	SoundIo* soundio = nullptr;
-	SoundIoDevice* device = nullptr;
-    SoundIoOutStream* outstream = nullptr;
-
+    void FillBuffer();
+    int buffer_size = 44100*2;
+    PoolVector2Array buffer = PoolVector2Array();
 	bool end_audio = false;
 	bool is_ok = true;
 	unsigned long startMsec;

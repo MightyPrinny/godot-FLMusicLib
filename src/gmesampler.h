@@ -2,15 +2,14 @@
 #include <audiosampler.h>
 #include <gme.h>
 #include <iostream>
-#include <soundio.h>
 using namespace std;
 
 class GMESampler : public AudioSampler
 {
 public:
-	virtual ~GMESampler() override;
+    GMESampler();
+    virtual ~GMESampler() override;
 	virtual bool LoadData( unique_ptr<unsigned char> data, long size,int track) override;
-	virtual void WriteCallback(struct SoundIoOutStream *outstream, int frame_count_min, int frame_count_max) override;
 
 	virtual void Seek(int msec) override
 	{
@@ -33,6 +32,8 @@ public:
 	{
 		return gme_track_ended(emu);
 	}
+
+    virtual void FillBuffer(PoolVector2Array* buffer,int size) override;
 private:
 	Music_Emu* emu = nullptr;
 	bool playing  = true;

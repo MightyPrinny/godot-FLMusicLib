@@ -9,6 +9,7 @@
 #include <File.hpp>
 #include <SceneTree.hpp>
 #include <OS.hpp>
+#include <AudioStreamPlayer.hpp>
 using namespace std;
 using namespace godot;
 
@@ -29,13 +30,23 @@ public:
 
     };
 	static FLMusicLib* instance;
-	FLMusicLib() {instance = this;musicInfo= new MusicInfo();cout << "Music player instance created";}
+    FLMusicLib()
+    {
+        instance = this;
+        musicInfo= new MusicInfo();
+        cout << "Music player instance created";
+
+    }
 
 
+
+    Ref<AudioStreamGenerator> gen;
+    Ref<AudioStreamGeneratorPlayback> play;
+    AudioStreamPlayer *player = nullptr;
     
 	~FLMusicLib()
     {
-		StopMusic();
+        StopMusic();
         if(storedMusicInfo != nullptr)
         {
             delete storedMusicInfo;
@@ -61,6 +72,15 @@ public:
         audioThread->reference();
         audioThread->start(this,"_t",Variant(),0);
     }
+
+    /*void _process(const real_t delta)
+    {
+        if(playing)
+        {
+            musicPlayer->HandlePlayback();
+        }
+    }
+    */
 	
     int fileLength;
 	
@@ -76,6 +96,7 @@ public:
 					break;
 				}
 				musicPlayer->HandlePlayback();
+
 				auto msec =  OS::get_singleton()->get_ticks_msec();
 				if(!musicPlayer->paused)
 					playTimeMsec += msec - prevMsec;
@@ -105,6 +126,7 @@ public:
 			delete musicPlayer;
 			musicPlayer = nullptr;
 		}
+        player->stop();
         return;
     }
 
@@ -159,6 +181,9 @@ public:
 		musicPlayer->sampler->loopPointStart = lpStart;
 		musicInfo->trackLength = musicPlayer->sampler->GetLengthMsec();
 		musicPlayer->BeginStreaming();
+        musicPlayer->HandlePlayback();
+        player->play();
+        cout << musicInfo->trackLength;
 
 	}
 
@@ -181,6 +206,8 @@ public:
 			delete musicPlayer;
 		}
 		musicPlayer = new MusicPlayer();
+        musicPlayer->gen = gen;
+        musicPlayer->playback = play;
 	}
 
 
@@ -208,7 +235,7 @@ public:
 			auto cstr = path.utf8();
 			auto ext = gme_identify_extension(cstr.get_data());
 
-			if(ext == 0)
+            if(ext == 0)
 			{
 				cerr << "couldn't identify extension";
 				return false;
@@ -247,18 +274,9 @@ public:
         //_InitMusic();
 	}
 
-    void SetVolumeMultiplier(float vol)
+    void SetVolume(float vol)
     {
-        if(vol <0)
-        {
-            vol *= -1;
-        }
-        if(vol > 1)
-        {
-            vol = 1;
-        }
-        if(musicPlayer != nullptr)
-            musicPlayer->volumeFact = vol;
+        player->set_volume_db(vol);
         this->vol = vol;
     }
 
@@ -342,13 +360,17 @@ public:
     {
 		if(playing && musicPlayer != nullptr)
 		{
-			musicPlayer->TogglePause();
+            player->set_stream_paused(!player->get_stream_paused());
 		}
     }
 	
     void _ready()
     {
-
+        player = (AudioStreamPlayer*)get_child(0);
+        gen = player->get_stream();
+        gen->set_mix_rate(44100);
+        //add_child(player);
+        play = player->get_stream_playback();
     }
 
 	bool IsPlaying()
@@ -368,7 +390,8 @@ public:
 		register_method("_t", &FLMusicLib::_t);
 		register_method("_ready", &FLMusicLib::_ready);
 		register_method("IsPlaying", &FLMusicLib::IsPlayerActive);
-		register_method("SetVolumeMultiplier", &FLMusicLib::SetVolumeMultiplier);
+        register_method("SetVolume", &FLMusicLib::SetVolume);
+        //register_method("_process", &FLMusicLib::_process);
 
 		register_signal<FLMusicLib>("track_ended",Dictionary());
 

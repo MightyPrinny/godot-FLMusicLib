@@ -2,14 +2,14 @@
 #define AUDIOSAMPLER_H
 #pragma once
 #include <memory>
-#include <soundio.h>
+#include <PoolArrays.hpp>
 using namespace std;
+using namespace godot;
 class AudioSampler
 {
 public:
 	AudioSampler()
 	{
-
 	}
 	virtual ~AudioSampler()
 	{
@@ -22,7 +22,6 @@ public:
 		fileData = std::move(bytes);
 		return true;
 	}
-	virtual void WriteCallback(struct SoundIoOutStream *outstream, int frame_count_min, int frame_count_max) = 0;
 	virtual void Seek(int msec) = 0;
 	virtual int TellMsec() = 0;
 	virtual bool TrackEnded()
@@ -34,8 +33,12 @@ public:
 		return -1;
 	}
 
-	float GetVolume();
+    virtual void FillBuffer(PoolVector2Array* buffer,int size)
+    {
 
+    }
+
+	float GetVolume();
 
 	//Fields
 	int track = 0;
@@ -44,6 +47,8 @@ public:
 	int loopPointEnd = -1;
 	int loopPointStart = -1;
 	long fileSize = 0;
+    bool autoBufferSize = true;
+    int customBufferSize = 0;
 	unique_ptr<unsigned char> fileData;
 };
 #endif // AUDIOSAMPLER_H

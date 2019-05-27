@@ -6,7 +6,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <soundio.h>
 #include <vector>
 
 #include <minimp3.h>
@@ -14,6 +13,12 @@
 class MP3Sampler : public AudioSampler
 {
 public:
+    MP3Sampler()
+    {
+        customBufferSize = MINIMP3_MAX_SAMPLES_PER_FRAME*4;
+        autoBufferSize = false;
+    }
+
 	virtual ~MP3Sampler() override
 	{
 		if(dec != nullptr)
@@ -36,7 +41,6 @@ public:
 		mp3dec_init(dec);
 		return true;
 	}
-	virtual void WriteCallback(struct SoundIoOutStream *outstream, int frame_count_min, int frame_count_max) override;
 
 	virtual void Seek(int msec) override
 	{
@@ -124,6 +128,9 @@ public:
 	{
 		return trackPos == (fileSize-1);
 	}
+
+    virtual void FillBuffer(PoolVector2Array* buffer,int size) override;
+
 private:
     std::vector<mp3d_sample_t >* buff = new std::vector<mp3d_sample_t >();
     mp3d_sample_t * frameBuff = new mp3d_sample_t[MINIMP3_MAX_SAMPLES_PER_FRAME*4];

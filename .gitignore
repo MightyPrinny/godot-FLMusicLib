@@ -1,4 +1,4 @@
 **.o
 **.obj
-*.user
-*.debug.64.a
+**.user
+**.debug.64.a

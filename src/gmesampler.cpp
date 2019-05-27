@@ -1,6 +1,11 @@
 #include "gmesampler.h"
 #include "musicplayer.h"
 
+GMESampler::GMESampler()
+{
+    MusicPlayer::instance->SetBufferSize(1024);
+}
+
 GMESampler::~GMESampler()
 {
 	if(emu != nullptr)
@@ -26,50 +31,35 @@ bool GMESampler::LoadData(unique_ptr<unsigned char> data, long size,int track)
 	}
 
 	std::cout << "error opening data\n";
-	return false;
+    return false;
 }
 
-void GMESampler::WriteCallback(SoundIoOutStream *outstream, int frame_count_min, int frame_count_max)
+void GMESampler::FillBuffer(PoolVector2Array *buffer, int size)
 {
+    int16_t *smbuf = new int16_t[size*2];
+    gme_play(emu,size*2,smbuf);
+    if(gme_track_ended(emu))
+    {
+        MusicPlayer::instance->endMusic = true;
+    }
 
-	struct SoundIoChannelArea *areas;
-	int err;
-	int frame_count = frame_count_max;
-	if (!frame_count)
-		return;
-	if ((err = soundio_outstream_begin_write(outstream, &areas, &frame_count))) {
-		//fprintf(stderr, "unrecoverable stream error: %s\n", soundio_strerror(err));
-		//reload_stream = true;
+    auto vol = GetVolume();
+    float l = 0;
+    float r = 0;
+    for(int i=0;i<size;++i)
+    {   
+        auto il = smbuf[i*2]*vol;
+        auto ir = smbuf[i*2+1]*vol;
 
-		return;
-	}
-	const struct SoundIoChannelLayout *layout = &outstream->layout;
-	int16_t *smbuf = new int16_t[frame_count*2];
-	gme_play(emu,frame_count*2,smbuf);
-	auto vol = GetVolume();
-	for (int frame = 0; frame < frame_count; frame += 1) {
-		int16_t sample = smbuf[frame];
-		uint8_t b[2];
-		b[1] = (sample & 0xFF00)>>8; // heigh byte
-		b[0] = sample & 0x00FF; // low byte
-		for (int channel = 0; channel < layout->channel_count; channel += 1) {
-			int16_t *ptr = (int16_t*)areas[channel].ptr;
-			*ptr = smbuf[frame*2+channel]*vol;
-			areas[channel].ptr += areas[channel].step;
-		}
-	}
-	if(gme_track_ended(emu))
-	{
-		MusicPlayer::instance->endMusic = true;
-	}
-	delete[] smbuf;
-	if ((err = soundio_outstream_end_write(outstream))) {
-		if (err == SoundIoErrorUnderflow)
-			return;
+        l = ((float) il) / (float) 32768;
+        if( l > 1 ) l = 1;
+        if( l < -1 ) l = -1;
 
-		//fprintf(stderr, "unrecoverable stream error: %s\n", soundio_strerror(err));
-		//queueNewStream();
-		return;
-	}
-	//soundio_outstream_pause(outstream, want_pause);
+        r = ((float) ir) / (float) 32768;
+        if( r > 1 ) r = 1;
+        if( r < -1 ) r = -1;
+
+        buffer->set(i,Vector2(l,r));
+    }
+    delete[] smbuf;
 }
