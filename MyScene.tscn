@@ -177,7 +177,6 @@ margin_right = 475.637
 margin_bottom = 40.9275
 text = "Music List
 "
-
 [connection signal="pressed" from="Btns/Stop" to="." method="stop_music"]
 [connection signal="text_changed" from="PanelContainer/VBoxContainer/HBoxContainer/TextEdit" to="." method="set_track_number"]
 [connection signal="text_changed" from="PanelContainer/VBoxContainer/HBoxContainer2/TextEdit" to="." method="set_loop_start"]

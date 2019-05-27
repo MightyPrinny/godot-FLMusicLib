@@ -7,7 +7,7 @@ onready var playPause = $Btns/Play;
 onready var storeBtn = $Btns/Store;
 onready var restoreBtn = $Btns/Restore;
 
-onready var GMEPlayer = $"/root/FLMusic";
+onready var GMEPlayer = global.music_player;
 
 var loopStart = 0;
 var loopEnd = 0;
@@ -27,11 +27,11 @@ func _play_music():
 	if !itemList.is_anything_selected():
 		return;
 	var mus = "res://Music/"+itemList.get_item_text(itemList.get_selected_items()[0]);
-	GMEPlayer.PlayMusic(mus,trackNum,loop,loopStart,loopEnd,0);
+	GMEPlayer.play_music(mus,trackNum,loop,loopStart,loopEnd,0);
 	set_volume(vol);
 	
 func  stop_music():
-	GMEPlayer.StopMusic();
+	GMEPlayer.stop_music();
 		
 func set_loop_end(var n):
 	loopEnd = n.to_int();
@@ -45,15 +45,15 @@ func set_track_number(var n):
 func set_loop(var b):
 	loop = b;		
 func toggle_pause():
-	GMEPlayer.TogglePause();
+	GMEPlayer.toggle_pause();
 	pass
 		
 func store_music_state():
-	GMEPlayer.StoreMusicState();
+	GMEPlayer.store_music_state();
 	pass
 	
 func restore_music_state():
-	GMEPlayer.RestoreMusicState();
+	GMEPlayer.restore_music_state();
 	pass
 	
 func _track_ended():
@@ -61,4 +61,4 @@ func _track_ended():
 	
 func set_volume(var t):
 	vol = t;
-	GMEPlayer.SetVolumeMultiplier(t.to_float());
+	GMEPlayer.set_volume(t.to_float());
