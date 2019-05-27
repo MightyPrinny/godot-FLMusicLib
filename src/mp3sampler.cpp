@@ -21,7 +21,7 @@ void MP3Sampler::FillBuffer(PoolVector2Array *buffer, int size)
     int j = 0;
     auto data = fileData.get();
     j = 0;
-    auto vol = GetVolume();
+
     do
     {
         samplesN = mp3dec_decode_frame(dec, (data+trackPos),MINIMP3_MAX_SAMPLES_PER_FRAME,frameBuff,&info);

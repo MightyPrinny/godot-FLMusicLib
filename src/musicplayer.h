@@ -39,7 +39,7 @@ public:
 	}
 	void SetVolumeFact(float v)
 	{
-        volumeFact = v;
+
 	}
 	void BeginStreaming()
 	{

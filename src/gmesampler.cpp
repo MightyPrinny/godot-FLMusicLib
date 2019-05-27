@@ -43,13 +43,12 @@ void GMESampler::FillBuffer(PoolVector2Array *buffer, int size)
         MusicPlayer::instance->endMusic = true;
     }
 
-    auto vol = GetVolume();
     float l = 0;
     float r = 0;
     for(int i=0;i<size;++i)
     {   
-        auto il = smbuf[i*2]*vol;
-        auto ir = smbuf[i*2+1]*vol;
+        auto il = smbuf[i*2];
+        auto ir = smbuf[i*2+1];
 
         l = ((float) il) / (float) 32768;
         if( l > 1 ) l = 1;
