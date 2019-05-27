@@ -396,11 +396,11 @@ public:
 
 	static void _register_methods()
 	{
-		register_method("storeMusicState", &FLMusicLib::StoreMusicState);
-		register_method("restoreMusicState", &FLMusicLib::RestoreMusicState);
-		register_method("getPositionMsec", &FLMusicLib::GetTrackPositionMsec);
-		register_method("playMusic", &FLMusicLib::PlayMusic);
-		register_method("stopMusic", &FLMusicLib::StopMusic);
+		register_method("store_music_state", &FLMusicLib::StoreMusicState);
+		register_method("restore_music_state", &FLMusicLib::RestoreMusicState);
+		register_method("get_position_msec", &FLMusicLib::GetTrackPositionMsec);
+		register_method("play_music", &FLMusicLib::PlayMusic);
+		register_method("stop_music", &FLMusicLib::StopMusic);
 		register_method("toggle_pause", &FLMusicLib::TogglePause);
 		register_method("_music_ended", &FLMusicLib::_MusicEnded);
 		register_method("_t", &FLMusicLib::_t);
