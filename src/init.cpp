@@ -158,6 +158,15 @@ public:
 		NewPlayer();
         musicPlayer->volumeFact = vol;
 		musicPlayer->LoadData(std::move(byteData),fileLength,fileType,track);
+
+		if(fileType == FileType::VGM)
+		{
+			if(customGMEBufferSize)
+			{
+				musicPlayer->sampler->customBufferSize = gmeBufferSize;
+				musicPlayer->sampler->autoBufferSize = false;
+			}
+		}
 		if(startMsecs > 0)
 		{
 			musicPlayer->Seek(startMsecs);
@@ -379,19 +388,26 @@ public:
 		return playing;
 	}
 
+	void SetGMEBufferSize(int sz)
+	{
+		customGMEBufferSize = true;
+		gmeBufferSize = sz;
+	}
+
 	static void _register_methods()
 	{
-		register_method("StoreMusicState", &FLMusicLib::StoreMusicState);
-		register_method("RestoreMusicState", &FLMusicLib::RestoreMusicState);
-		register_method("GetPositionMsec", &FLMusicLib::GetTrackPositionMsec);
-		register_method("PlayMusic", &FLMusicLib::PlayMusic);
-		register_method("StopMusic", &FLMusicLib::StopMusic);
-		register_method("TogglePause", &FLMusicLib::TogglePause);
-        register_method("_MusicEnded", &FLMusicLib::_MusicEnded);
+		register_method("storeMusicState", &FLMusicLib::StoreMusicState);
+		register_method("restoreMusicState", &FLMusicLib::RestoreMusicState);
+		register_method("getPositionMsec", &FLMusicLib::GetTrackPositionMsec);
+		register_method("playMusic", &FLMusicLib::PlayMusic);
+		register_method("stopMusic", &FLMusicLib::StopMusic);
+		register_method("toggle_pause", &FLMusicLib::TogglePause);
+		register_method("_music_ended", &FLMusicLib::_MusicEnded);
 		register_method("_t", &FLMusicLib::_t);
 		register_method("_ready", &FLMusicLib::_ready);
-		register_method("IsPlaying", &FLMusicLib::IsPlayerActive);
-        register_method("SetVolume", &FLMusicLib::SetVolume);
+		register_method("is_playing", &FLMusicLib::IsPlayerActive);
+		register_method("set_volume", &FLMusicLib::SetVolume);
+		register_method("set_gme_buffer_size", &FLMusicLib::SetGMEBufferSize);
         //register_method("_process", &FLMusicLib::_process);
 
 		register_signal<FLMusicLib>("track_ended",Dictionary());
@@ -405,10 +421,10 @@ private:
 	String filePath;
 	FileType fileType;
 	int track = 0;
-	Music_Emu* emu = nullptr;
 	bool playing = false;
 	int startMsecs;
-	int sampleRate;
+	bool customGMEBufferSize = false;
+	int gmeBufferSize = 0;
 	MusicInfo* musicInfo = nullptr;
 	MusicInfo* storedMusicInfo = nullptr;
 	Thread* audioThread = nullptr;

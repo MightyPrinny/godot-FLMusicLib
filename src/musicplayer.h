@@ -71,7 +71,7 @@ public:
     Ref<AudioStreamGenerator> gen;
     Ref<AudioStreamGeneratorPlayback> playback;
 	AudioStreamPlayer *player;
-
+	int buffer_size = 44100*2;
     void CleanBuffer()
     {
 
@@ -84,7 +84,7 @@ public:
 
 private:
     void FillBuffer();
-    int buffer_size = 44100*2;
+
     PoolVector2Array buffer = PoolVector2Array();
 	bool end_audio = false;
 	bool is_ok = true;
