@@ -217,6 +217,7 @@ public:
             audioThread = nullptr;
             stopAudioThread = false;
         }
+        Godot::print("track_ended");
     }
 
 	void NewPlayer()
@@ -317,7 +318,7 @@ public:
 		StartMusicThread();
 		loops = loop;
         //_InitMusic();
-        Godot::print("play_music");
+
 	}
 
     void SetVolume(float vol)

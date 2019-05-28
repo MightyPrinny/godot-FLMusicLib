@@ -22,7 +22,7 @@ public:
 
     virtual void Seek(int msec) override
     {
-        //mod->set_position_seconds(double(msec)/double(1000.0));
+        mod->set_position_seconds(double(msec)/double(1000.0));
     }
 
     virtual bool LoadData(unique_ptr<unsigned char>bytes,long size,int track) override
@@ -43,6 +43,12 @@ public:
        {
            return false;
        }
+       try {
+           mod->select_subsong(track);
+       } catch (openmpt::exception e) {
+
+       }
+
        Godot::print("loaded tracker module");
        return true;
 
@@ -59,18 +65,7 @@ public:
 
     }
 
-    virtual void FillBuffer(PoolVector2Array* buffer,int size) override
-    {
-        auto l = new float[size];
-        auto r = new float[size];
-        mod->read(sample_rate,size,l,r);
-        for(int i=0;i<size;++i)
-        {
-            buffer->set(i,Vector2(l[i],r[i]));
-        }
-        delete l;
-        delete r;
-    }
+    virtual void FillBuffer(PoolVector2Array* buffer,int size) override;
 
     openmpt::module *mod = nullptr;
 
