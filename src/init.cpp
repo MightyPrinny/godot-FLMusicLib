@@ -105,7 +105,11 @@ public:
                 if(musicPlayer->endMusic)
 				{
                     //stopAudioThread = true;
-					OS::get_singleton()->delay_msec(int(double(musicPlayer->buffer_size+Performance::get_singleton()->get_monitor(Performance::AUDIO_OUTPUT_LATENCY))/double(musicPlayer->sample_rate))*1000);
+					//The bindings have different things in the enum so substract 1 for now
+					int ltc = int(Performance::get_singleton()->get_monitor(Performance::AUDIO_OUTPUT_LATENCY-1)*double(1000));
+
+					Godot::print(String::num(ltc,0));
+					OS::get_singleton()->delay_msec(int(double(musicPlayer->buffer_size)/double(musicPlayer->sample_rate))*1000+ltc);
 					playing = false;
                     call_deferred("_MusicEnded");
 
