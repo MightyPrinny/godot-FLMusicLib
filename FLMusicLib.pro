@@ -9,13 +9,15 @@ SOURCES += \
     src/audiosampler.cpp \
     src/gmesampler.cpp \
     src/mp3sampler.cpp \
-    src/musicplayer.cpp
+    src/musicplayer.cpp \
+    src/openmptsampler.cpp
 
 HEADERS += \
     src/audiosampler.h \
     src/gmesampler.h \
     src/mp3sampler.h \
-    src/musicplayer.h
+    src/musicplayer.h \
+    src/openmptsampler.h
 
 INCLUDEPATH += $$PWD/include
 INCLUDEPATH += $$PWD/godot-cpp
@@ -51,6 +53,7 @@ linux:{
     PRE_TARGETDEPS += $$PWD/godot-cpp/bin/libgodot-cpp.linux.release.64.a
     LIBS += -L$$PWD/godot-cpp/bin
     LIBS += -lgodot-cpp.linux.release.64
+    LIBS += -lopenmpt
     PRE_TARGETDEPS += $$PWD/lib/linux/x64/libgme.a
     LIBS += -L$$PWD/lib/linux/x64
     LIBS += -lgme

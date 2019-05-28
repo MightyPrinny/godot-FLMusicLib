@@ -6,13 +6,15 @@
 #include <AudioStreamGeneratorPlayback.hpp>
 #include <PoolArrays.hpp>
 #include <AudioStreamPlayer.hpp>
+#include <openmptsampler.h>
 
 using namespace godot;
 
 enum FileType
 {
 	VGM,
-	MP3
+    MP3,
+    MOD
 };
 
 
@@ -26,7 +28,7 @@ public:
 public:
 	bool paused = false;
     int sample_rate;
-	void LoadData(unique_ptr<unsigned char> data,int size,FileType type,int track = 0);
+    bool LoadData(unique_ptr<unsigned char> data,int size,FileType type,int track = 0);
 	void HandlePlayback();
 	bool IsOk();
 	void Seek(int msec)

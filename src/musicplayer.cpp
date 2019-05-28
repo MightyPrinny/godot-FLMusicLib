@@ -27,7 +27,7 @@ MusicPlayer::~MusicPlayer()
 	endMusic = false;
 }
 
-void MusicPlayer::LoadData(unique_ptr<unsigned char> data,int size, FileType type,int track)
+bool MusicPlayer::LoadData(unique_ptr<unsigned char> data,int size, FileType type,int track)
 {
 	if(sampler != nullptr)
 	{
@@ -41,12 +41,15 @@ void MusicPlayer::LoadData(unique_ptr<unsigned char> data,int size, FileType typ
 		case MP3:
 			sampler = new MP3Sampler();
 		break;
+        case MOD:
+            sampler = new OpenMPTSampler();
+        break;
 		default:
 			cout <<"error\n";
 		break;
 	}
 	sampler->sample_rate = sample_rate;
-	sampler->LoadData(std::move(data),size,track);
+    return sampler->LoadData(std::move(data),size,track);
 }
 
 void MusicPlayer::HandlePlayback()

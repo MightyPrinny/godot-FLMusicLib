@@ -117,7 +117,7 @@ public:
 			if(initMusic)
 			{
 				_InitMusic();
-				playing = true;
+
 			}
 
         }
@@ -138,8 +138,12 @@ public:
 
         if(ErrOr != godot::Error::OK)
         {
-            cerr <<"couldn't open g file\n";
+            Godot::print("couldn't open g file\n");
+            f->close();
+            f->free();
 			initMusicRestore = false;
+            stopAudioThread = true;
+            playing = false;
             return;
         }
 
@@ -157,8 +161,16 @@ public:
 
 		NewPlayer();
         musicPlayer->volumeFact = vol;
-		musicPlayer->LoadData(std::move(byteData),fileLength,fileType,track);
+        auto loaded = musicPlayer->LoadData(std::move(byteData),fileLength,fileType,track);
+        if (!loaded)
+        {
+            playing = false;
+            initMusicRestore = false;
+            stopAudioThread = true;
+            Godot::print_error("couldn't load file","_InitMusic","init.cpp",164);
+            return;
 
+        }
 		if(fileType == FileType::VGM)
 		{
 			if(customGMEBufferSize)
@@ -192,7 +204,7 @@ public:
 		musicPlayer->BeginStreaming();
         musicPlayer->HandlePlayback();
         player->play();
-
+        playing = true;
 	}
 
     void _MusicEnded()
@@ -234,31 +246,55 @@ public:
 		}
 		String mp3 = ".mp3";
 		FileType type;
+        String mod[5];
+        int m = 0;
+        mod[m++] = ".xm";
+        mod[m++] = ".mod";
+        mod[m++] = ".s3m";
+        mod[m++] = ".it";
+        mod[m++] = ".mptm";
 		auto pth = path.to_lower();
 		if(pth.ends_with(mp3))
 		{
 			type = FileType::MP3;
 		}
-		else
-		{
-			auto cstr = path.utf8();
-			auto ext = gme_identify_extension(cstr.get_data());
+        else
+        {
+            bool isMod = false;
 
-            if(ext == 0)
-			{
-				cerr << "couldn't identify extension";
-				return false;
-			}
+            for(int j=0;j<m;j++)
+            {
+                if(pth.ends_with(mod[j]))
+                {
+                    isMod = true;
+                    type = FileType::MOD;
+                    break;
 
-			type = FileType::VGM;
-		}
+                }
+            }
+
+            if(!isMod)
+            {
+                auto cstr = path.utf8();
+                auto ext = gme_identify_extension(cstr.get_data());
+
+                if(ext == 0)
+                {
+                    Godot::print("couldn't identify extension");
+                    return false;
+                }
+
+                type = FileType::VGM;
+
+            }
+        }
 
 		File *f = File::_new();
 		auto ErrOr = f->open(path,1);
 		bool ok = true;
 		if(ErrOr != godot::Error::OK)
 		{
-			cerr <<"couldn't open godot file\n";
+            Godot::print("couldn't open godot file\n");
 			ok = false;
 		}
 		f->close();
@@ -281,6 +317,7 @@ public:
 		StartMusicThread();
 		loops = loop;
         //_InitMusic();
+        Godot::print("play_music");
 	}
 
     void SetVolume(float vol)
