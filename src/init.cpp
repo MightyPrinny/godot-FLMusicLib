@@ -107,9 +107,6 @@ public:
                     //stopAudioThread = true;
 					OS::get_singleton()->delay_msec(int(double(musicPlayer->buffer_size+Performance::get_singleton()->get_monitor(Performance::AUDIO_OUTPUT_LATENCY))/double(musicPlayer->sample_rate))*1000);
 					playing = false;
-                    Godot::print("mended");
-                    cout<<"mended";
-                    cerr<<"ended";
                     call_deferred("_MusicEnded");
 
 				}
@@ -223,7 +220,7 @@ public:
         }*/
         StopMusic();
         emit_signal("track_ended");
-        Godot::print("track_ended");
+		cout<<"track_ended";
     }
 
 	void NewPlayer()
