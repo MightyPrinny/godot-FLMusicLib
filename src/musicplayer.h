@@ -54,8 +54,7 @@ public:
 	}
 	int GetLatency()
 	{
-		double l;
-		return (l*1000);
+        return int(double(sample_rate)/buffer_size);
 	}
 
     void SetBufferSize(int size)
@@ -73,7 +72,7 @@ public:
     Ref<AudioStreamGenerator> gen;
     Ref<AudioStreamGeneratorPlayback> playback;
 	AudioStreamPlayer *player;
-	int buffer_size = 44100*2;
+    int buffer_size = 2048;
     void CleanBuffer()
     {
 

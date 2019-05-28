@@ -56,7 +56,7 @@ public:
 
     virtual int TellMsec() override
     {
-        int(mod->get_position_seconds()*1000);
+		return int(mod->get_position_seconds()*1000);
     }
 
     virtual int GetLengthMsec() override
@@ -66,8 +66,12 @@ public:
     }
 
     virtual void FillBuffer(PoolVector2Array* buffer,int size) override;
-
+    virtual bool TrackEnded() override
+    {
+        return ended;
+    }
     openmpt::module *mod = nullptr;
+    bool ended = false;
 
 };
 

@@ -98,16 +98,19 @@ public:
 				musicPlayer->HandlePlayback();
 
 				auto msec =  OS::get_singleton()->get_ticks_msec();
-				if(!musicPlayer->paused)
+                if(!player->get_stream_paused())
 					playTimeMsec += msec - prevMsec;
 				prevMsec = msec;
-                if(musicPlayer->sampler->TrackEnded() && musicPlayer->finish_music)
+                if(musicPlayer->endMusic)
 				{
-                    stopAudioThread = true;
-					OS::get_singleton()->delay_msec(musicPlayer->GetLatency()-10);
+                    //stopAudioThread = true;
+					OS::get_singleton()->delay_msec(int(double(musicPlayer->buffer_size)/double(musicPlayer->sample_rate))*1000);
 					playing = false;
-
+                    Godot::print("mended");
+                    cout<<"mended";
+                    cerr<<"ended";
                     call_deferred("_MusicEnded");
+
 				}
 				else
 				{
@@ -209,14 +212,16 @@ public:
 
     void _MusicEnded()
     {
-        emit_signal("track_ended");
-        if(audioThread != nullptr)
+
+        /*if(audioThread != nullptr)
         {
             audioThread->wait_to_finish();
             audioThread->free();
             audioThread = nullptr;
             stopAudioThread = false;
-        }
+        }*/
+        StopMusic();
+        emit_signal("track_ended");
         Godot::print("track_ended");
     }
 
@@ -440,7 +445,7 @@ public:
 		register_method("play_music", &FLMusicLib::PlayMusic);
 		register_method("stop_music", &FLMusicLib::StopMusic);
 		register_method("toggle_pause", &FLMusicLib::TogglePause);
-		register_method("_music_ended", &FLMusicLib::_MusicEnded);
+        register_method("_MusicEnded", &FLMusicLib::_MusicEnded);
 		register_method("_t", &FLMusicLib::_t);
 		register_method("_ready", &FLMusicLib::_ready);
 		register_method("is_playing", &FLMusicLib::IsPlayerActive);

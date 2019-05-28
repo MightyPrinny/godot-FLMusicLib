@@ -13,6 +13,7 @@ void OpenMPTSampler::FillBuffer(PoolVector2Array *buffer, int size)
     if(count == 0)
     {
         MusicPlayer::instance->endMusic = true;
+        ended = true;
     }
     delete l;
     delete r;

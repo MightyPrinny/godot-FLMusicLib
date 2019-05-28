@@ -3,7 +3,8 @@
 
 GMESampler::GMESampler()
 {
-    MusicPlayer::instance->SetBufferSize(1024);
+	customBufferSize = 2048;
+	autoBufferSize = false;
 }
 
 GMESampler::~GMESampler()
