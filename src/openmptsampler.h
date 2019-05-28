@@ -46,7 +46,11 @@ public:
        try {
            mod->select_subsong(track);
        } catch (openmpt::exception e) {
-
+            ok = false;
+       }
+       if(!ok)
+       {
+           return false;
        }
 
        Godot::print("loaded tracker module");
