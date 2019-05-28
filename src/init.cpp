@@ -10,6 +10,7 @@
 #include <SceneTree.hpp>
 #include <OS.hpp>
 #include <AudioStreamPlayer.hpp>
+#include <Performance.hpp>
 using namespace std;
 using namespace godot;
 
@@ -104,7 +105,7 @@ public:
                 if(musicPlayer->endMusic)
 				{
                     //stopAudioThread = true;
-					OS::get_singleton()->delay_msec(int(double(musicPlayer->buffer_size)/double(musicPlayer->sample_rate))*1000);
+					OS::get_singleton()->delay_msec(int(double(musicPlayer->buffer_size+Performance::get_singleton()->get_monitor(Performance::AUDIO_OUTPUT_LATENCY))/double(musicPlayer->sample_rate))*1000);
 					playing = false;
                     Godot::print("mended");
                     cout<<"mended";
