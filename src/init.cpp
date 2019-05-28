@@ -11,6 +11,7 @@
 #include <OS.hpp>
 #include <AudioStreamPlayer.hpp>
 #include <Performance.hpp>
+#include <SceneTreeTimer.hpp>
 using namespace std;
 using namespace godot;
 
@@ -66,6 +67,8 @@ public:
 
 	unsigned int playTimeMsec = 0;
 	unsigned long prevMsec = 0;
+    SceneTree* tree;
+    SceneTreeTimer* musicEndTimer = nullptr;
     void StartMusicThread()
     {
 
@@ -103,20 +106,20 @@ public:
 					playTimeMsec += msec - prevMsec;
 				prevMsec = msec;
                 if(musicPlayer->endMusic)
-				{
+                {
                     //stopAudioThread = true;
 					//The bindings have different things in the enum so substract 1 for now
 					int ltc = int(Performance::get_singleton()->get_monitor(Performance::AUDIO_OUTPUT_LATENCY-1)*double(1000));
-
+                    ltc += gen->get_buffer_length()*1000;
 					Godot::print(String::num(ltc,0));
-					OS::get_singleton()->delay_msec(int(double(musicPlayer->buffer_size)/double(musicPlayer->sample_rate))*1000+ltc);
-					playing = false;
-                    call_deferred("_MusicEnded");
-
+                    int delay_msec = int(double(musicPlayer->buffer_size)/double(musicPlayer->sample_rate))*1000+ltc;
+                    musicEndTimer = tree->create_timer(double(delay_msec)/double(1000),true).ptr();
+                    musicEndTimer->connect("timeout",this,"_MusicEnded");
+                    playing = false;
 				}
 				else
 				{
-					OS::get_singleton()->delay_msec(10);
+                    OS::get_singleton()->delay_msec(8);
 				}
 			}
 			if(initMusic)
@@ -131,7 +134,10 @@ public:
 			delete musicPlayer;
 			musicPlayer = nullptr;
 		}
-        player->stop();
+        if(player->is_playing())
+        {
+            player->stop();
+        }
         return;
     }
 
@@ -176,6 +182,9 @@ public:
             return;
 
         }
+        player->seek(0);
+        play->clear_buffer();
+
 		if(fileType == FileType::VGM)
 		{
 			if(customGMEBufferSize)
@@ -222,6 +231,12 @@ public:
             audioThread = nullptr;
             stopAudioThread = false;
         }*/
+        playing = false;
+        if(musicEndTimer != nullptr)
+        {
+            musicEndTimer->disconnect("timeout",this,"_MusicEnded");
+            musicEndTimer = nullptr;
+        }
         StopMusic();
         emit_signal("track_ended");
 		cout<<"track_ended";
@@ -237,6 +252,7 @@ public:
         musicPlayer->gen = gen;
         musicPlayer->playback = play;
 		musicPlayer->player = player;
+
 	}
 
 
@@ -247,11 +263,19 @@ public:
 		{
 			return false;
 		}
+        if(musicEndTimer != nullptr)
+        {
+            musicEndTimer->disconnect("timeout",this,"_MusicEnded");
+            musicEndTimer = nullptr;
+        }
 		StopMusic();
+
+
         if(stopAudioThread || audioThread != nullptr || playing)
 		{
 			return false;
 		}
+
 		String mp3 = ".mp3";
 		FileType type;
         String mod[5];
@@ -405,7 +429,11 @@ public:
 			audioThread = nullptr;
 		}
         stopAudioThread = false;
-		player->stop();
+        if(player->is_playing())
+        {
+            player->stop();
+        }
+
 	}
 	void SetCurrentPlayTime(int msecs)
 	{
@@ -426,6 +454,7 @@ public:
         gen->set_mix_rate(44100);
         //add_child(player);
         play = player->get_stream_playback();
+        tree = get_tree();
     }
 
 	bool IsPlaying()

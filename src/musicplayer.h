@@ -46,7 +46,6 @@ public:
 	void BeginStreaming()
 	{
 		startMsec = godot::OS::get_singleton()->get_ticks_msec();
-        CleanBuffer();
 	}
 	void TogglePause()
 	{
@@ -80,7 +79,6 @@ public:
         {
             buffer.set(i,Vector2(0,0));
         }
-        playback->clear_buffer();
     }
 
 private:

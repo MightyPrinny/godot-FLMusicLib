@@ -33,6 +33,7 @@ PRE_TARGETDEPS += $$PWD/../
 QMAKE_CXXFLAGS_RELEASE += -fPIC
 
 win32:contains(QMAKE_TARGET.arch, x86_64){
+    INCLUDEPATH += $$PWD/include/openmpt
     LIBS += "$$PWD/lib/windows/x64/libgme.lib"
     #LIBS += "$$PWD/lib/windows/x64/libsoundio.dll.a"
     #LIBS += "$$PWD/lib/windows/x64/libsoundio.a"
@@ -41,6 +42,7 @@ win32:contains(QMAKE_TARGET.arch, x86_64){
 }
 
 win32:contains(QMAKE_TARGET.arch, x86){
+    INCLUDEPATH += $$PWD/include/openmpt
     LIBS += "$$PWD/lib/windows/x86/libgme.lib"
     #LIBS += "$$PWD/lib/windows/x86/libsoundio.dll.a"
     #LIBS += "$$PWD/lib/windows/x86/libsoundio.a"
