@@ -12,6 +12,8 @@
 #include <AudioStreamPlayer.hpp>
 #include <Performance.hpp>
 #include <SceneTreeTimer.hpp>
+#include <AudioStreamOGGVorbis.hpp>
+#include <ResourceLoader.hpp>
 using namespace std;
 using namespace godot;
 
@@ -182,8 +184,6 @@ public:
             return;
 
         }
-        player->seek(0);
-        play->clear_buffer();
 
 		if(fileType == FileType::VGM)
 		{
@@ -201,6 +201,16 @@ public:
 		{
 			musicInfo = new MusicInfo();
 		}
+
+        Ref<AudioStreamGenerator> _gen;
+        _gen.instance();
+        gen->set_mix_rate(44100);
+        gen = _gen;
+        player->set_stream(_gen);
+
+        play = player->get_stream_playback();
+        musicPlayer->playback = play;
+
 		musicInfo->currentMsec = startMsecs;
 		musicInfo->resPath = filePath;
 		musicInfo->track = track;
@@ -215,6 +225,8 @@ public:
 		musicPlayer->sampler->loopPointEnd = lpEnd;
 		musicPlayer->sampler->loopPointStart = lpStart;
 		musicInfo->trackLength = musicPlayer->sampler->GetLengthMsec();
+
+
 		musicPlayer->BeginStreaming();
         musicPlayer->HandlePlayback();
         player->play();
@@ -231,11 +243,15 @@ public:
             audioThread = nullptr;
             stopAudioThread = false;
         }*/
-        playing = false;
-        if(musicEndTimer != nullptr)
+        if(fileType != FileType::OGG)
         {
-            musicEndTimer->disconnect("timeout",this,"_MusicEnded");
-            musicEndTimer = nullptr;
+            playing = false;
+            if(musicEndTimer != nullptr)
+            {
+                musicEndTimer->disconnect("timeout",this,"_MusicEnded");
+                musicEndTimer = nullptr;
+            }
+
         }
         StopMusic();
         emit_signal("track_ended");
@@ -285,6 +301,7 @@ public:
         mod[m++] = ".s3m";
         mod[m++] = ".it";
         mod[m++] = ".mptm";
+        String ogg = "ogg";
 		auto pth = path.to_lower();
 		if(pth.ends_with(mp3))
 		{
@@ -292,32 +309,39 @@ public:
 		}
         else
         {
-            bool isMod = false;
-
-            for(int j=0;j<m;j++)
+            if(pth.ends_with(ogg))
             {
-                if(pth.ends_with(mod[j]))
-                {
-                    isMod = true;
-                    type = FileType::MOD;
-                    break;
-
-                }
+                type = FileType::OGG;
             }
-
-            if(!isMod)
+            else
             {
-                auto cstr = path.utf8();
-                auto ext = gme_identify_extension(cstr.get_data());
+                bool isMod = false;
 
-                if(ext == 0)
+                for(int j=0;j<m;j++)
                 {
-                    Godot::print("couldn't identify extension");
-                    return false;
+                    if(pth.ends_with(mod[j]))
+                    {
+                        isMod = true;
+                        type = FileType::MOD;
+                        break;
+
+                    }
                 }
 
-                type = FileType::VGM;
+                if(!isMod)
+                {
+                    auto cstr = path.utf8();
+                    auto ext = gme_identify_extension(cstr.get_data());
 
+                    if(ext == 0)
+                    {
+                        Godot::print("couldn't identify extension");
+                        return false;
+                    }
+
+                    type = FileType::VGM;
+
+                }
             }
         }
 
@@ -346,8 +370,34 @@ public:
 		stopAudioThread= false;
 		lpStart = loopStart;
 		lpEnd = loopEnd;
-		StartMusicThread();
-		loops = loop;
+        loops = loop;
+
+        if(type != FileType::OGG)
+        {
+            StartMusicThread();
+        }
+        else
+        {
+            Ref<Resource> oggres = ResourceLoader::get_singleton()->load(path);
+            if(oggres.is_valid())
+            {
+                player->set_stream(oggres);
+                playing = true;
+                player->play();
+                player->seek(double(startMsec)/double(1000));
+                player->connect("finished",this,"_MusicEnded",Array(),ConnectFlags::CONNECT_ONESHOT);
+            }
+            initMusic = false;
+            if(musicInfo == nullptr)
+            {
+                musicInfo = new MusicInfo();
+            }
+            musicInfo->resPath = path;
+            musicInfo->currentMsec = startMsec;
+
+
+        }
+        player->set_stream_paused(false);
         //_InitMusic();
 
 	}
@@ -370,8 +420,14 @@ public:
 		storedMusicInfo->loopEnd = musicInfo->loopEnd;
 		storedMusicInfo->loopStart = musicInfo->loopStart;
 		storedMusicInfo->trackLength = musicInfo->trackLength;
-
-		storedMusicInfo->currentMsec = playTimeMsec;
+        if(fileType != FileType::OGG)
+        {
+            storedMusicInfo->currentMsec = playTimeMsec;
+        }
+        else
+        {
+            storedMusicInfo->currentMsec = (player->get_playback_position()*double(1000));
+        }
 		storedMusicInfo->loop = musicInfo->loop;
 		if(fileType == FileType::VGM)
 		{
@@ -398,16 +454,25 @@ public:
         startMsecs = storedMusicInfo->currentMsec;
         track = storedMusicInfo->track;
 		PlayMusic(filePath,track,storedMusicInfo->loop,storedMusicInfo->loopStart,storedMusicInfo->loopEnd,startMsecs);
+
     }
 	
 	int GetTrackPositionMsec()
 	{
-		return playTimeMsec;
+        if(fileType != FileType::OGG)
+        {
+            return int(playTimeMsec);
+        }
+        else
+        {
+            return int(player->get_playback_position()*float(1000));
+        }
+
 	}
 
     bool IsPlayerActive()
     {
-		return false;
+        return player->is_playing();
     }
 
 	void StopMusic()
@@ -416,7 +481,10 @@ public:
         {
             return;
         }
-		//stopMusic = true;
+        if(player->is_connected("finished",this,"_MusicEnded"))
+        {
+            player->disconnect("finished",this,"_MusicEnded");
+        }
 		initMusic = false;
 		initMusicRestore =false;
 		playing = false;
@@ -432,6 +500,7 @@ public:
         if(player->is_playing())
         {
             player->stop();
+
         }
 
 	}
@@ -441,10 +510,7 @@ public:
 	}
     void TogglePause()
     {
-		if(playing && musicPlayer != nullptr)
-		{
-            player->set_stream_paused(!player->get_stream_paused());
-		}
+        player->set_stream_paused(!player->get_stream_paused());
     }
 	
     void _ready()

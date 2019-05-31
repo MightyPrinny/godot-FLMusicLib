@@ -14,7 +14,8 @@ enum FileType
 {
 	VGM,
     MP3,
-    MOD
+    MOD,
+    OGG
 };
 
 
