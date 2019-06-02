@@ -34,19 +34,49 @@ public:
 
     };
 	static FLMusicLib* instance;
+
+    Ref<AudioStreamGenerator> gen;
+    Ref<AudioStreamGeneratorPlayback> play;
+    AudioStreamPlayer* player;
+
+    unsigned int playTimeMsec = 0;
+    unsigned long prevMsec = 0;
+    int fileLength;
+    SceneTree* tree;
+    SceneTreeTimer* musicEndTimer = nullptr;
+
+    MusicPlayer *musicPlayer = nullptr;
+    float vol = 1;
+    const int MAX_MUSIC_SEEK_MSEC = 60500*3;
+    String filePath;
+    FileType fileType;
+    int track = 0;
+    bool playing = false;
+    int startMsecs;
+    bool customGMEBufferSize = false;
+    int gmeBufferSize = 0;
+    MusicInfo* musicInfo = nullptr;
+    MusicInfo* storedMusicInfo = nullptr;
+    Thread* audioThread = nullptr;
+    bool stopMusic = false;
+    bool stopAudioThread = false;
+
+    bool initMusic = false;
+    bool initMusicRestore = false;
+    bool loops = true;
+    int lpStart = -1;
+    int lpEnd = -1;
+
+    String _name;
+
+
     FLMusicLib()
     {
         instance = this;
         musicInfo= new MusicInfo();
-        cout << "Music player instance created";
+		cout <<"\nMusic player instance created";
 
     }
-
-
-
-    Ref<AudioStreamGenerator> gen;
-    Ref<AudioStreamGeneratorPlayback> play;
-    AudioStreamPlayer *player = nullptr;
     
 	~FLMusicLib()
     {
@@ -63,14 +93,29 @@ public:
 			audioThread->free();
             audioThread = nullptr;
         }
+		cout <<"\nMusic player instance destroyed";
     }
     /* _init must exist as it is called by Godot */
     void _init() { }
 
-	unsigned int playTimeMsec = 0;
-	unsigned long prevMsec = 0;
-    SceneTree* tree;
-    SceneTreeTimer* musicEndTimer = nullptr;
+
+	void _ready()
+	{
+		player = AudioStreamPlayer::_new();
+		Ref<AudioStreamGenerator> _gen;
+		_gen.instance();
+		gen = _gen;
+		gen->set_mix_rate(44100);
+		player->set_stream(gen);
+
+		play = player->get_stream_playback();
+
+		add_child(player);
+		tree = get_tree();
+
+	}
+
+
     void StartMusicThread()
     {
 
@@ -79,17 +124,6 @@ public:
         audioThread->start(this,"_t",Variant(),0);
     }
 
-    /*void _process(const real_t delta)
-    {
-        if(playing)
-        {
-            musicPlayer->HandlePlayback();
-        }
-    }
-    */
-	
-    int fileLength;
-	
     void _t(Object* o = nullptr)
     {
         while(!stopAudioThread)
@@ -172,7 +206,15 @@ public:
         f->close();
         f->free();
 
+		Ref<AudioStreamGenerator> _gen;
+		_gen.instance();
+		gen = _gen;
+		gen->set_mix_rate(44100);
+		player->set_stream(gen);
+		play = player->get_stream_playback();
+
 		NewPlayer();
+
         musicPlayer->volumeFact = vol;
         auto loaded = musicPlayer->LoadData(std::move(byteData),fileLength,fileType,track);
         if (!loaded)
@@ -202,15 +244,6 @@ public:
 			musicInfo = new MusicInfo();
 		}
 
-        Ref<AudioStreamGenerator> _gen;
-        _gen.instance();
-        gen->set_mix_rate(44100);
-        gen = _gen;
-        player->set_stream(_gen);
-
-        play = player->get_stream_playback();
-        musicPlayer->playback = play;
-
 		musicInfo->currentMsec = startMsecs;
 		musicInfo->resPath = filePath;
 		musicInfo->track = track;
@@ -235,14 +268,6 @@ public:
 
     void _MusicEnded()
     {
-
-        /*if(audioThread != nullptr)
-        {
-            audioThread->wait_to_finish();
-            audioThread->free();
-            audioThread = nullptr;
-            stopAudioThread = false;
-        }*/
         if(fileType != FileType::OGG)
         {
             playing = false;
@@ -267,11 +292,9 @@ public:
 		musicPlayer = new MusicPlayer();
         musicPlayer->gen = gen;
         musicPlayer->playback = play;
-		musicPlayer->player = player;
+        musicPlayer->player = player;
 
 	}
-
-
 
 	bool PlayMusic(String path,int trackNum,bool loop = true,int loopStart = -1,int loopEnd = -1,int startMsec = 0)
 	{
@@ -512,16 +535,6 @@ public:
     {
         player->set_stream_paused(!player->get_stream_paused());
     }
-	
-    void _ready()
-    {
-        player = (AudioStreamPlayer*)get_child(0);
-        gen = player->get_stream();
-        gen->set_mix_rate(44100);
-        //add_child(player);
-        play = player->get_stream_playback();
-        tree = get_tree();
-    }
 
 	bool IsPlaying()
 	{
@@ -554,31 +567,7 @@ public:
 
     }
 
-private:
-	MusicPlayer *musicPlayer = nullptr;
-    float vol = 1;
-	const int MAX_MUSIC_SEEK_MSEC = 60500*3;
-	String filePath;
-	FileType fileType;
-	int track = 0;
-	bool playing = false;
-	int startMsecs;
-	bool customGMEBufferSize = false;
-	int gmeBufferSize = 0;
-	MusicInfo* musicInfo = nullptr;
-	MusicInfo* storedMusicInfo = nullptr;
-	Thread* audioThread = nullptr;
-	bool stopMusic = false;
-	bool stopAudioThread = false;
-
-	bool initMusic = false;
-	bool initMusicRestore = false;
-	bool loops = true;
-	int lpStart = -1;
-	int lpEnd = -1;
-
-    String _name;
-
+//Who needs private stuff in something like this anyways
 };
 
 /** GDNative Initialize **/
