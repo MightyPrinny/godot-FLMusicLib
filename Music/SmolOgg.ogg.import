@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/SmolOgg.ogg-73ddb67d81186d6542bac94c63bbb4ab.oggstr"
+
+[deps]
+
+source_file="res://Music/SmolOgg.ogg"
+dest_files=[ "res://.import/SmolOgg.ogg-73ddb67d81186d6542bac94c63bbb4ab.oggstr" ]
+
+[params]
+
+loop=false
+loop_offset=0

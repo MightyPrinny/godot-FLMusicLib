@@ -57,7 +57,7 @@ func restore_music_state():
 	pass
 	
 func _track_ended():
-	print("end");
+	print("end of track");
 	
 func set_volume(var t):
 	vol = t;

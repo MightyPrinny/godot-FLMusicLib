@@ -1,0 +1,12 @@
+/home/Fabian/WindowsCDrive/FromLinux/GDNative/FLMusicLib Demo/.mono/temp/bin/Tools/NativeLibTest.dll
+/home/Fabian/WindowsCDrive/FromLinux/GDNative/FLMusicLib Demo/.mono/temp/bin/Tools/NativeLibTest.pdb
+/home/Fabian/WindowsCDrive/FromLinux/GDNative/FLMusicLib Demo/.mono/temp/obj/Tools/NativeLibTest.csprojAssemblyReference.cache
+/home/Fabian/WindowsCDrive/FromLinux/GDNative/FLMusicLib Demo/.mono/temp/obj/Tools/NativeLibTest.csproj.CoreCompileInputs.cache
+/home/Fabian/WindowsCDrive/FromLinux/GDNative/FLMusicLib Demo/.mono/temp/obj/Tools/NativeLibTest.dll
+/home/Fabian/WindowsCDrive/FromLinux/GDNative/FLMusicLib Demo/.mono/temp/obj/Tools/NativeLibTest.pdb
+C:\FromLinux\GDNative\FLMusicLib Demo\.mono\temp\bin\Tools\NativeLibTest.dll
+C:\FromLinux\GDNative\FLMusicLib Demo\.mono\temp\bin\Tools\NativeLibTest.pdb
+C:\FromLinux\GDNative\FLMusicLib Demo\.mono\temp\obj\Tools\NativeLibTest.csprojAssemblyReference.cache
+C:\FromLinux\GDNative\FLMusicLib Demo\.mono\temp\obj\Tools\NativeLibTest.csproj.CoreCompileInputs.cache
+C:\FromLinux\GDNative\FLMusicLib Demo\.mono\temp\obj\Tools\NativeLibTest.dll
+C:\FromLinux\GDNative\FLMusicLib Demo\.mono\temp\obj\Tools\NativeLibTest.pdb
