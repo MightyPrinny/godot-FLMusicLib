@@ -30,4 +30,4 @@ Methods
 
 Signals
 
--track_ended: emited when the music is not looping and a music track ends, timing might not be accurate(Or might not be emited at all but I haven't seen that yet) for chiptune music since the music length is unknown.
+-track_ended: emited when the music is not looping and a music track ends, timing might not be accurate for chiptune music since the music length is unknown in most cases.
