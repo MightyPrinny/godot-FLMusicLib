@@ -1,7 +1,9 @@
 GDNative library that plays mp3 and chiptune music files.
 The project uses GameMuseEmu, Minimp3, libopenmpt and the new Audio features from Godot 3.1.1
 
-This project is statically linked to GME 0.6.2, so I have to offer access to the source code in order to use a different licence. GME Source Code: https://bitbucket.org/mpyne/game-music-emu/src/0.6.2/
+This project is statically linked to GME 0.6.2 which is lincences under the LGPLv2.1. GME Source Code: https://bitbucket.org/mpyne/game-music-emu/src/0.6.2/
+
+Check the licences folder for more information on the libraries used in this project.
 
 Notes
 
