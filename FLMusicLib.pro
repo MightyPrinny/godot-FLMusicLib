@@ -35,8 +35,6 @@ QMAKE_CXXFLAGS_RELEASE += -fPIC
 win32:contains(QMAKE_TARGET.arch, x86_64){
     INCLUDEPATH += $$PWD/include/openmpt
     LIBS += "$$PWD/lib/windows/x64/libgme.lib"
-    #LIBS += "$$PWD/lib/windows/x64/libsoundio.dll.a"
-    #LIBS += "$$PWD/lib/windows/x64/libsoundio.a"
     LIBS += "$$PWD/lib/windows/x64/libgodot-cpp.windows.release.64.lib"
     LIBS += "$$PWD/lib/windows/x64/libopenmpt.lib"
 }
@@ -44,14 +42,11 @@ win32:contains(QMAKE_TARGET.arch, x86_64){
 win32:contains(QMAKE_TARGET.arch, x86){
     INCLUDEPATH += $$PWD/include/openmpt
     LIBS += "$$PWD/lib/windows/x86/libgme.lib"
-    #LIBS += "$$PWD/lib/windows/x86/libsoundio.dll.a"
-    #LIBS += "$$PWD/lib/windows/x86/libsoundio.a"
     LIBS += "$$PWD/lib/windows/x86/libgodot-cpp.windows.release.32.lib"
     LIBS += "$$PWD/lib/windows/x86/libopenmpt.lib"
 }
 
 linux:{
-    #LIBS += -L/home/Fabian/Documents/Godot/GDNative/libsound/libsoundio/Build/ -lsoundio
     PRE_TARGETDEPS += $$PWD/godot-cpp/bin/libgodot-cpp.linux.release.64.a
     LIBS += -L$$PWD/godot-cpp/bin
     LIBS += -lgodot-cpp.linux.release.64

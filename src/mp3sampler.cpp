@@ -1,8 +1,6 @@
 #define MINIMP3_IMPLEMENTATION
 #include "mp3sampler.h"
 #include "init.cpp"
-FLMusicLib* FLMusicLib::instance;
-
 
 void MP3Sampler::FillBuffer(PoolVector2Array *buffer, int size)
 {
@@ -60,7 +58,7 @@ void MP3Sampler::FillBuffer(PoolVector2Array *buffer, int size)
                 if((PosToMsec(trackPos)>=loopPointEnd) || (trackPos == fileSize-1))
                 {
                     trackPos = MsecToPos(loopPointStart);
-                    FLMusicLib::instance->SetCurrentPlayTime(loopPointStart);
+                    lib_instance->SetCurrentPlayTime(loopPointStart);
                 }
             }
 
@@ -69,7 +67,7 @@ void MP3Sampler::FillBuffer(PoolVector2Array *buffer, int size)
         if(trackPos >= fileSize)
         {
             trackPos = fileSize-1;
-            MusicPlayer::instance->endMusic = true;
+            player_instance->endMusic = true;
         }
 
 

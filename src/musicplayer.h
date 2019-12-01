@@ -1,4 +1,8 @@
+#ifndef MUSICPLAYER_H
+#define MUSICPLAYER_H
+
 #pragma once
+class FLMusicLib;
 #include <gmesampler.h>
 #include <mp3sampler.h>
 #include <OS.hpp>
@@ -7,6 +11,8 @@
 #include <PoolArrays.hpp>
 #include <AudioStreamPlayer.hpp>
 #include <openmptsampler.h>
+
+
 
 using namespace godot;
 
@@ -40,10 +46,12 @@ public:
             CleanBuffer();
 		}
 	}
-	void SetVolumeFact(float v)
-	{
 
-	}
+    void SetLibInstance(FLMusicLib* instance)
+    {
+        lib_instance = instance;
+    }
+
 	void BeginStreaming()
 	{
 		startMsec = godot::OS::get_singleton()->get_ticks_msec();
@@ -65,13 +73,13 @@ public:
 
 	AudioSampler *sampler = nullptr;
 
-	static MusicPlayer *instance;
-	static bool endMusic;
+    bool endMusic = false;
 	float volumeFact = 1;
     bool finish_music = false;
     Ref<AudioStreamGenerator> gen;
     Ref<AudioStreamGeneratorPlayback> playback;
-	AudioStreamPlayer *player;
+    FLMusicLib* lib_instance = nullptr;
+    AudioStreamPlayer *player = nullptr;
     int buffer_size = 2048;
     void CleanBuffer()
     {
@@ -88,7 +96,7 @@ private:
     PoolVector2Array buffer = PoolVector2Array();
 	bool end_audio = false;
 	bool is_ok = true;
-	unsigned long startMsec;
-	static unsigned int device_count;
+    unsigned long startMsec = 0;
 };
 
+#endif

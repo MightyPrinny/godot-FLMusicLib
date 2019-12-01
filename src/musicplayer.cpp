@@ -1,11 +1,8 @@
 #include "musicplayer.h"
-unsigned int MusicPlayer::device_count;
-MusicPlayer* MusicPlayer::instance;
-bool MusicPlayer::endMusic;
+
 MusicPlayer::MusicPlayer()
 {
 	endMusic = false;
-	MusicPlayer::instance = this;
 	is_ok = true;
 
     sample_rate = 44100;
@@ -49,6 +46,8 @@ bool MusicPlayer::LoadData(unique_ptr<unsigned char> data,int size, FileType typ
 		break;
 	}
 	sampler->sample_rate = sample_rate;
+    sampler->SetLibInstance(lib_instance);
+    sampler->SetPlayerInstance(this);
     return sampler->LoadData(std::move(data),size,track);
 }
 

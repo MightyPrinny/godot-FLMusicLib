@@ -41,7 +41,7 @@ void GMESampler::FillBuffer(PoolVector2Array *buffer, int size)
     gme_play(emu,size*2,smbuf);
     if(gme_track_ended(emu))
     {
-        MusicPlayer::instance->endMusic = true;
+        player_instance->endMusic = true;
     }
 
     float l = 0;

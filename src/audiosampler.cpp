@@ -3,5 +3,5 @@
 
 float AudioSampler::GetVolume()
 {
-	return MusicPlayer::instance->volumeFact;
+    return player_instance->volumeFact;
 }
