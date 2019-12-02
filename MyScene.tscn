@@ -12,7 +12,8 @@ margin_top = 34.1526
 margin_right = 225.508
 margin_bottom = 74.1526
 __meta__ = {
-"_edit_group_": true
+"_edit_group_": true,
+"_edit_use_anchors_": false
 }
 
 [node name="Play" type="Button" parent="Btns"]
@@ -46,6 +47,9 @@ margin_bottom = 322.0
 max_text_lines = 999
 same_column_width = true
 script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Load" type="Button" parent="."]
 margin_left = 409.734
@@ -134,7 +138,6 @@ margin_right = 120.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 32, 32 )
 rect_pivot_offset = Vector2( 16, 16 )
-focus_mode = 1
 focus_mode = 1
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
