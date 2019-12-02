@@ -1,3 +1,4 @@
+#ifndef NO_OMPT
 #include "openmptsampler.h"
 #include "musicplayer.h"
 
@@ -18,3 +19,4 @@ void OpenMPTSampler::FillBuffer(PoolVector2Array *buffer, int size)
     delete[] l;
     delete[] r;
 }
+#endif

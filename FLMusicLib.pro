@@ -46,7 +46,29 @@ win32:contains(QMAKE_TARGET.arch, x86){
     LIBS += "$$PWD/lib/windows/x86/libopenmpt.lib"
 }
 
-linux:{
+#message (ANDROID:$$ANDROID_TARGET_ARCH)
+
+android:contains(ANDROID_TARGET_ARCH,armeabi-v7a){
+    message ("armv7a")
+    DEFINES += NO_OMPT
+    PRE_TARGETDEPS += $$PWD/lib/android/armv7a/libgodot-cpp.a
+    LIBS += -L$$PWD/lib/android/armv7a
+    LIBS += -lgodot-cpp
+    PRE_TARGETDEPS += $$PWD/lib/android/armv7a/libgme.a
+    LIBS += -lgme
+}
+android:contains(ANDROID_TARGET_ARCH,arm64-v8a){
+    message ("armv8")
+    DEFINES += NO_OMPT
+    PRE_TARGETDEPS += $$PWD/lib/android/armv8-64/libgodot-cpp.a
+    LIBS += -L$$PWD/lib/android/armv8-64
+    LIBS += -lgodot-cpp
+    PRE_TARGETDEPS += $$PWD/lib/android/armv8-64/libgme.a
+    LIBS += -lgme
+}
+
+linux:contains(QMAKE_TARGET.arch, x86_64){
+    message(linux)
     PRE_TARGETDEPS += $$PWD/godot-cpp/bin/libgodot-cpp.linux.release.64.a
     LIBS += -L$$PWD/godot-cpp/bin
     LIBS += -lgodot-cpp.linux.release.64

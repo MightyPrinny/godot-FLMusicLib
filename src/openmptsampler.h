@@ -1,7 +1,7 @@
+#ifndef NO_OMPT
 #pragma once
 #include "audiosampler.h"
 #include <libopenmpt/libopenmpt.hpp>
-
 
 class OpenMPTSampler : public AudioSampler
 {
@@ -78,4 +78,7 @@ public:
     bool ended = false;
 
 };
+
+#endif
+
 
