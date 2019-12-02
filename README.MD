@@ -8,7 +8,7 @@ Check the licenses folder for more information on the libraries used in this pro
 Notes
 
 -mp3 files must have a constant bitrate.
-
+-after exporting a windows game you have to copy some of the dlls to the game folder manually
 
 Methods
 
