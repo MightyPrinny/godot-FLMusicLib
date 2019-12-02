@@ -7,12 +7,16 @@ reloadable=true
 
 [entry]
 
+Android.armeabi-v7a="res://FLMusicLib/Android/armv7a/libFLMusicLib.so"
+Android.arm64-v8a="res://FLMusicLib/Android/armv8-64/libFLMusicLib.so"
 Windows.64="res://FLMusicLib/Windows/x64/FLMusicLib.dll"
 Windows.32="res://FLMusicLib/Windows/x86/FLMusicLib.dll"
 X11.64="res://FLMusicLib/Linux/x64/libFLMusicLib.so.1.0.0"
 
 [dependencies]
 
+Android.armeabi-v7a=[  ]
+Android.arm64-v8a=[  ]
 Windows.64=[  ]
 Windows.32=[  ]
 X11.64=[  ]
